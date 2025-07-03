@@ -953,27 +953,506 @@
       </div>
 
       <!-- Results Section -->
-      <div
-        id="resultsSection"
-        class="hidden mt-8 glass-card rounded-3xl p-12 text-center shadow-soft-lg dark:shadow-dark-soft animate-scale-in"
-      >
+      <div id="resultsSection" class="hidden mt-8 space-y-8 animate-scale-in">
         <!-- Overall Score -->
-        <div class="text-center">
-          <h2 class="text-3xl font-bold mb-2">Overall Score</h2>
-          <div class="text-6xl font-bold mb-4">
-            <span id="overallScore">--</span
-            ><span class="text-3xl opacity-75">/100</span>
+        <div
+          class="glass-card rounded-3xl p-12 text-center shadow-soft-lg dark:shadow-dark-soft"
+        >
+          <h2 class="text-3xl font-bold mb-2 text-gray-900 dark:text-white">
+            Overall Score
+          </h2>
+          <div class="text-6xl font-bold mb-4 text-gray-900 dark:text-white">
+            <span id="overallScore">--</span>
+            <span class="text-3xl opacity-75">/100</span>
           </div>
-          <div class="w-full bg-white/20 rounded-full h-3 mb-4">
+          <div
+            class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-3 mb-4"
+          >
             <div
               id="overallProgress"
-              class="bg-white h-3 rounded-full progress-bar"
+              class="bg-gradient-to-r from-primary-500 to-secondary-500 h-3 rounded-full progress-bar"
               style="width: 0%"
             ></div>
           </div>
-          <p class="text-primary-100 text-lg">
+          <p class="text-gray-600 dark:text-dark-300 text-lg">
             Your resume analysis is complete
           </p>
+        </div>
+
+        <!-- Detailed Analysis Scores -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Clarity Score -->
+          <div
+            class="glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft"
+          >
+            <h3
+              class="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center"
+            >
+              <svg
+                class="w-6 h-6 text-blue-500 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+              Clarity
+            </h3>
+            <div class="text-3xl font-bold mb-3 text-gray-900 dark:text-white">
+              <span id="clarityScore">--</span>
+              <span class="text-lg opacity-75">/100</span>
+            </div>
+            <div
+              class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2 mb-4"
+            >
+              <div
+                id="clarityProgress"
+                class="bg-blue-500 h-2 rounded-full progress-bar"
+                style="width: 0%"
+              ></div>
+            </div>
+            <p
+              id="clarityFeedback"
+              class="text-sm text-gray-600 dark:text-dark-300"
+            >
+              No feedback available
+            </p>
+          </div>
+
+          <!-- Impact Score -->
+          <div
+            class="glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft"
+          >
+            <h3
+              class="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center"
+            >
+              <svg
+                class="w-6 h-6 text-green-500 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                ></path>
+              </svg>
+              Impact
+            </h3>
+            <div class="text-3xl font-bold mb-3 text-gray-900 dark:text-white">
+              <span id="impactScore">--</span>
+              <span class="text-lg opacity-75">/100</span>
+            </div>
+            <div
+              class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2 mb-4"
+            >
+              <div
+                id="impactProgress"
+                class="bg-green-500 h-2 rounded-full progress-bar"
+                style="width: 0%"
+              ></div>
+            </div>
+            <p
+              id="impactFeedback"
+              class="text-sm text-gray-600 dark:text-dark-300"
+            >
+              No feedback available
+            </p>
+          </div>
+
+          <!-- ATS Score -->
+          <div
+            class="glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft"
+          >
+            <h3
+              class="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center"
+            >
+              <svg
+                class="w-6 h-6 text-purple-500 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+              ATS Optimization
+            </h3>
+            <div class="text-3xl font-bold mb-3 text-gray-900 dark:text-white">
+              <span id="atsScore">--</span>
+              <span class="text-lg opacity-75">/100</span>
+            </div>
+            <div
+              class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2 mb-4"
+            >
+              <div
+                id="atsProgress"
+                class="bg-purple-500 h-2 rounded-full progress-bar"
+                style="width: 0%"
+              ></div>
+            </div>
+            <p
+              id="atsFeedback"
+              class="text-sm text-gray-600 dark:text-dark-300"
+            >
+              No feedback available
+            </p>
+          </div>
+
+          <!-- Formatting Score -->
+          <div
+            class="glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft"
+          >
+            <h3
+              class="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center"
+            >
+              <svg
+                class="w-6 h-6 text-orange-500 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM7 3H5a2 2 0 00-2 2v12a4 4 0 004 4h2a2 2 0 002-2V5a2 2 0 00-2-2H7z"
+                ></path>
+              </svg>
+              Formatting
+            </h3>
+            <div class="text-3xl font-bold mb-3 text-gray-900 dark:text-white">
+              <span id="formattingScore">--</span>
+              <span class="text-lg opacity-75">/100</span>
+            </div>
+            <div
+              class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2 mb-4"
+            >
+              <div
+                id="formattingProgress"
+                class="bg-orange-500 h-2 rounded-full progress-bar"
+                style="width: 0%"
+              ></div>
+            </div>
+            <p
+              id="formattingFeedback"
+              class="text-sm text-gray-600 dark:text-dark-300"
+            >
+              No feedback available
+            </p>
+          </div>
+        </div>
+
+        <!-- Advanced Analysis -->
+        <div
+          class="glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft"
+        >
+          <h3 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+            Advanced Analysis
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Tone Analysis -->
+            <div
+              class="bg-white/50 dark:bg-dark-800/50 rounded-xl p-6 backdrop-blur-sm"
+            >
+              <h4 class="font-semibold text-gray-900 dark:text-white mb-3">
+                Tone Analysis
+              </h4>
+              <div
+                class="text-2xl font-bold mb-2 text-gray-900 dark:text-white"
+              >
+                <span id="toneScore">--</span>
+                <span class="text-sm opacity-75">/100</span>
+              </div>
+              <div
+                class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2 mb-3"
+              >
+                <div
+                  id="toneProgress"
+                  class="bg-indigo-500 h-2 rounded-full progress-bar"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <p
+                id="toneType"
+                class="text-sm text-gray-600 dark:text-dark-300 mb-2"
+              >
+                Tone: --
+              </p>
+              <p
+                id="toneFeedback"
+                class="text-xs text-gray-500 dark:text-dark-400"
+              >
+                No feedback available
+              </p>
+            </div>
+
+            <!-- Bullet Points -->
+            <div
+              class="bg-white/50 dark:bg-dark-800/50 rounded-xl p-6 backdrop-blur-sm"
+            >
+              <h4 class="font-semibold text-gray-900 dark:text-white mb-3">
+                Bullet Points
+              </h4>
+              <div
+                class="text-2xl font-bold mb-2 text-gray-900 dark:text-white"
+              >
+                <span id="bulletScore">--</span>
+                <span class="text-sm opacity-75">/100</span>
+              </div>
+              <div
+                class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2 mb-3"
+              >
+                <div
+                  id="bulletProgress"
+                  class="bg-emerald-500 h-2 rounded-full progress-bar"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <p class="text-sm text-gray-600 dark:text-dark-300 mb-1">
+                Action verbs:
+                <span id="actionVerbs" class="font-semibold">--</span>
+              </p>
+              <p class="text-sm text-gray-600 dark:text-dark-300 mb-2">
+                Quantified:
+                <span id="quantifiedBullets" class="font-semibold">--</span>
+              </p>
+              <p
+                id="bulletFeedback"
+                class="text-xs text-gray-500 dark:text-dark-400"
+              >
+                No feedback available
+              </p>
+            </div>
+
+            <!-- Buzzwords -->
+            <div
+              class="bg-white/50 dark:bg-dark-800/50 rounded-xl p-6 backdrop-blur-sm"
+            >
+              <h4 class="font-semibold text-gray-900 dark:text-white mb-3">
+                Buzzwords
+              </h4>
+              <div
+                class="text-2xl font-bold mb-2 text-gray-900 dark:text-white"
+              >
+                <span id="buzzwordScore">--</span>
+                <span class="text-sm opacity-75">/100</span>
+              </div>
+              <div
+                class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2 mb-3"
+              >
+                <div
+                  id="buzzwordProgress"
+                  class="bg-yellow-500 h-2 rounded-full progress-bar"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <p class="text-sm text-gray-600 dark:text-dark-300 mb-2">
+                Found: <span id="buzzwordCount" class="font-semibold">--</span>
+              </p>
+              <div
+                id="buzzwordList"
+                class="text-xs text-gray-500 dark:text-dark-400"
+              ></div>
+            </div>
+
+            <!-- Red Flags -->
+            <div
+              class="bg-white/50 dark:bg-dark-800/50 rounded-xl p-6 backdrop-blur-sm"
+            >
+              <h4 class="font-semibold text-gray-900 dark:text-white mb-3">
+                Red Flags
+              </h4>
+              <div
+                class="text-2xl font-bold mb-2 text-gray-900 dark:text-white"
+              >
+                <span id="redFlagScore">--</span>
+                <span class="text-sm opacity-75">/100</span>
+              </div>
+              <div
+                class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2 mb-3"
+              >
+                <div
+                  id="redFlagProgress"
+                  class="bg-red-500 h-2 rounded-full progress-bar"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <p class="text-sm text-gray-600 dark:text-dark-300 mb-2">
+                Issues: <span id="redFlagCount" class="font-semibold">--</span>
+              </p>
+              <div
+                id="redFlagList"
+                class="text-xs text-gray-500 dark:text-dark-400"
+              ></div>
+            </div>
+
+            <!-- Skills Balance -->
+            <div
+              class="bg-white/50 dark:bg-dark-800/50 rounded-xl p-6 backdrop-blur-sm"
+            >
+              <h4 class="font-semibold text-gray-900 dark:text-white mb-3">
+                Skills Balance
+              </h4>
+              <div
+                class="text-2xl font-bold mb-2 text-gray-900 dark:text-white"
+              >
+                <span id="skillsScore">--</span>
+                <span class="text-sm opacity-75">/100</span>
+              </div>
+              <div
+                class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2 mb-3"
+              >
+                <div
+                  id="skillsProgress"
+                  class="bg-teal-500 h-2 rounded-full progress-bar"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <p class="text-sm text-gray-600 dark:text-dark-300 mb-1">
+                Hard skills:
+                <span id="hardSkills" class="font-semibold">--</span>
+              </p>
+              <p class="text-sm text-gray-600 dark:text-dark-300 mb-1">
+                Soft skills:
+                <span id="softSkills" class="font-semibold">--</span>
+              </p>
+              <p class="text-sm text-gray-600 dark:text-dark-300">
+                Ratio: <span id="skillsRatio" class="font-semibold">--</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Strengths and Suggestions -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Strengths -->
+          <div
+            class="glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft"
+          >
+            <h3
+              class="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center"
+            >
+              <svg
+                class="w-6 h-6 text-green-500 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+              Strengths
+            </h3>
+            <ul
+              id="strengthsList"
+              class="text-sm text-gray-600 dark:text-dark-300 space-y-2"
+            >
+              <li>• Loading strengths...</li>
+            </ul>
+          </div>
+
+          <!-- Suggestions -->
+          <div
+            class="glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft"
+          >
+            <h3
+              class="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center"
+            >
+              <svg
+                class="w-6 h-6 text-blue-500 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+              Suggestions
+            </h3>
+            <ul
+              id="suggestionsList"
+              class="text-sm text-gray-600 dark:text-dark-300 space-y-2"
+            >
+              <li>• Loading suggestions...</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Job Description Matching (shown only when enabled) -->
+        <div
+          id="jdMatchSection"
+          class="hidden glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft"
+        >
+          <h3
+            class="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center"
+          >
+            <svg
+              class="w-6 h-6 text-emerald-500 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              ></path>
+            </svg>
+            Job Description Match
+          </h3>
+          <div class="text-3xl font-bold mb-3 text-gray-900 dark:text-white">
+            <span id="jdMatchScore">--</span>
+            <span class="text-lg opacity-75">/100</span>
+          </div>
+          <div
+            class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2 mb-4"
+          >
+            <div
+              id="jdMatchProgress"
+              class="bg-emerald-500 h-2 rounded-full progress-bar"
+              style="width: 0%"
+            ></div>
+          </div>
+          <p
+            id="jdMatchFeedback"
+            class="text-sm text-gray-600 dark:text-dark-300 mb-4"
+          >
+            No JD feedback available
+          </p>
+
+          <div id="jdRecommendationsSection" class="hidden">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-3">
+              Recommendations
+            </h4>
+            <ul
+              id="jdRecommendationsList"
+              class="text-sm text-gray-600 dark:text-dark-300 space-y-2"
+            >
+              <li>• Loading recommendations...</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
