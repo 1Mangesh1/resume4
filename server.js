@@ -10,9 +10,26 @@ const mammoth = require("mammoth");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configure multer for file uploads (use /tmp for serverless environments)
+// Ensure uploads directory exists in /tmp (writable in serverless)
+const ensureUploadsDir = async () => {
+  try {
+    await fs.access("/tmp");
+  } catch {
+    await fs.mkdir("/tmp", { recursive: true });
+  }
+  try {
+    await fs.access("/tmp/uploads");
+  } catch {
+    await fs.mkdir("/tmp/uploads", { recursive: true });
+  }
+};
+
+// Initialize uploads directory for serverless
+ensureUploadsDir().catch(console.error);
+
+// Configure multer for file uploads (use memory storage for serverless)
 const upload = multer({
-  dest: "/tmp/uploads/",
+  storage: multer.memoryStorage(),
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
@@ -39,31 +56,34 @@ app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static("public"));
 
-// Ensure uploads directory exists in /tmp (writable in serverless)
-const ensureUploadsDir = async () => {
-  try {
-    await fs.access("/tmp/uploads");
-  } catch {
-    await fs.mkdir("/tmp/uploads", { recursive: true });
-  }
-};
-
-// Extract text from file based on type
-const extractTextFromFile = async (filePath, mimetype) => {
+// Extract text from file buffer or file path
+const extractTextFromFile = async (fileData, mimetype) => {
   try {
     if (mimetype === "application/pdf") {
-      const dataBuffer = await fs.readFile(filePath);
+      // Handle both buffer and file path
+      const dataBuffer = Buffer.isBuffer(fileData)
+        ? fileData
+        : await fs.readFile(fileData);
       const data = await pdfParse(dataBuffer);
       return data.text;
     } else if (
       mimetype ===
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ) {
-      const result = await mammoth.extractRawText({ path: filePath });
-      return result.value;
+      if (Buffer.isBuffer(fileData)) {
+        const result = await mammoth.extractRawText({ buffer: fileData });
+        return result.value;
+      } else {
+        const result = await mammoth.extractRawText({ path: fileData });
+        return result.value;
+      }
     } else if (mimetype === "text/plain") {
-      const data = await fs.readFile(filePath, "utf8");
-      return data;
+      if (Buffer.isBuffer(fileData)) {
+        return fileData.toString("utf8");
+      } else {
+        const data = await fs.readFile(fileData, "utf8");
+        return data;
+      }
     }
     throw new Error("Unsupported file type");
   } catch (error) {
@@ -265,18 +285,14 @@ app.get("/api/health", (req, res) => {
 
 // API endpoint for resume analysis
 app.post("/api/analyze", upload.single("resumeFile"), async (req, res) => {
-  let uploadedFilePath = null;
-
   try {
-    await ensureUploadsDir();
-
     let resumeText = "";
 
     // Extract resume text from file or direct input
     if (req.file) {
-      uploadedFilePath = req.file.path;
+      // Use buffer from memory storage
       resumeText = await extractTextFromFile(
-        uploadedFilePath,
+        req.file.buffer,
         req.file.mimetype
       );
     } else if (req.body.resumeText) {
@@ -506,11 +522,6 @@ app.post("/api/analyze", upload.single("resumeFile"), async (req, res) => {
       error: "Failed to analyze resume. Please try again.",
       details: error.message,
     });
-  } finally {
-    // Clean up uploaded file
-    if (uploadedFilePath) {
-      await cleanupFile(uploadedFilePath);
-    }
   }
 });
 
