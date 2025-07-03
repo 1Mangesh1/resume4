@@ -37,6 +37,9 @@ let themeToggle, proTipToast, dismissProTip;
 let currentInputMethod = "file";
 let selectedFile = null;
 
+// Add at the top with other DOM elements
+let includeSummaryGen, includeVariantGen, includeCoverGen, includeLinkedInGen;
+
 // Dark Mode Functionality
 function initializeTheme() {
   // Check for saved theme preference or default to light mode
@@ -197,6 +200,12 @@ document.addEventListener("DOMContentLoaded", function () {
   themeToggle = document.getElementById("themeToggle");
   proTipToast = document.getElementById("proTipToast");
   dismissProTip = document.getElementById("dismissProTip");
+
+  // Add generator options
+  includeSummaryGen = document.getElementById("includeSummaryGen");
+  includeVariantGen = document.getElementById("includeVariantGen");
+  includeCoverGen = document.getElementById("includeCoverGen");
+  includeLinkedInGen = document.getElementById("includeLinkedInGen");
 
   // Event Listeners - Ensure DOM elements exist first
   if (analyzeBtn) {
@@ -655,6 +664,30 @@ function showResults(data) {
     if (suggestionsList)
       updateList(suggestionsList, data.top_suggestions || []);
   }, 1500);
+
+  // Show generator outputs if present
+  if (resultsSection) {
+    // Remove previous generator outputs
+    const prevGen = document.getElementById("generatorOutputs");
+    if (prevGen) prevGen.remove();
+    // Create new generator outputs container
+    const genDiv = document.createElement("div");
+    genDiv.id = "generatorOutputs";
+    genDiv.className = "space-y-8 mt-8";
+    if (data.resume_summary) {
+      genDiv.innerHTML += `<div class='glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft'><h3 class='text-2xl font-bold mb-3 text-gray-900 dark:text-white'>Resume Summary</h3><p class='text-gray-700 dark:text-dark-200 text-lg whitespace-pre-line'>${data.resume_summary}</p></div>`;
+    }
+    if (data.tailored_resume) {
+      genDiv.innerHTML += `<div class='glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft'><h3 class='text-2xl font-bold mb-3 text-gray-900 dark:text-white'>Tailored Resume Variant</h3><p class='text-gray-700 dark:text-dark-200 text-lg whitespace-pre-line'>${data.tailored_resume}</p></div>`;
+    }
+    if (data.cover_letter) {
+      genDiv.innerHTML += `<div class='glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft'><h3 class='text-2xl font-bold mb-3 text-gray-900 dark:text-white'>Cover Letter</h3><p class='text-gray-700 dark:text-dark-200 text-lg whitespace-pre-line'>${data.cover_letter}</p></div>`;
+    }
+    if (data.linkedin_summary) {
+      genDiv.innerHTML += `<div class='glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft'><h3 class='text-2xl font-bold mb-3 text-gray-900 dark:text-white'>LinkedIn Summary</h3><p class='text-gray-700 dark:text-dark-200 text-lg whitespace-pre-line'>${data.linkedin_summary}</p></div>`;
+    }
+    if (genDiv.innerHTML) resultsSection.appendChild(genDiv);
+  }
 }
 
 // Update score and progress bar
@@ -916,6 +949,12 @@ async function analyzeResume() {
       "includeJDMatch",
       (includeJDMatch?.checked || false) && jdText.length > 0
     );
+
+    // Add generator options
+    formData.append("includeSummaryGen", includeSummaryGen?.checked || false);
+    formData.append("includeVariantGen", includeVariantGen?.checked || false);
+    formData.append("includeCoverGen", includeCoverGen?.checked || false);
+    formData.append("includeLinkedInGen", includeLinkedInGen?.checked || false);
 
     const response = await fetch("/api/analyze", {
       method: "POST",

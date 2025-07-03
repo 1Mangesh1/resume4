@@ -857,6 +857,110 @@
             </div>
           </div>
 
+          <!-- New: Generator Options -->
+          <div class="mt-8">
+            <h4
+              class="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center"
+            >
+              <svg
+                class="w-6 h-6 text-emerald-500 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              Optional Generators
+            </h4>
+            <div class="grid md:grid-cols-2 gap-4">
+              <label
+                class="flex items-start p-5 bg-white/80 dark:bg-dark-800/80 rounded-2xl border border-gray-200 dark:border-dark-600 cursor-pointer card-hover transition-all duration-300 hover:border-primary-300 dark:hover:border-primary-500 backdrop-blur-sm"
+              >
+                <input
+                  type="checkbox"
+                  id="includeSummaryGen"
+                  class="mt-1 w-5 h-5 text-primary-600 bg-gray-100 dark:bg-dark-700 border-gray-300 dark:border-dark-500 rounded focus:ring-primary-500 dark:focus:ring-primary-400 focus:ring-2"
+                />
+                <div class="ml-4">
+                  <div
+                    class="font-semibold text-gray-900 dark:text-white flex items-center"
+                  >
+                    ✅ Resume Summary Generator
+                  </div>
+                  <div class="text-sm text-gray-600 dark:text-dark-300">
+                    Auto-generate a professional resume summary/introduction
+                    based on content + target role.
+                  </div>
+                </div>
+              </label>
+              <label
+                class="flex items-start p-5 bg-white/80 dark:bg-dark-800/80 rounded-2xl border border-gray-200 dark:border-dark-600 cursor-pointer card-hover transition-all duration-300 hover:border-primary-300 dark:hover:border-primary-500 backdrop-blur-sm"
+              >
+                <input
+                  type="checkbox"
+                  id="includeVariantGen"
+                  class="mt-1 w-5 h-5 text-primary-600 bg-gray-100 dark:bg-dark-700 border-gray-300 dark:border-dark-500 rounded focus:ring-primary-500 dark:focus:ring-primary-400 focus:ring-2"
+                />
+                <div class="ml-4">
+                  <div
+                    class="font-semibold text-gray-900 dark:text-white flex items-center"
+                  >
+                    ✅ Tailored Resume Variant Generator
+                  </div>
+                  <div class="text-sm text-gray-600 dark:text-dark-300">
+                    One-click generation of a tailored version of the resume for
+                    the provided JD (rewrites bullets, suggests reordering).
+                  </div>
+                </div>
+              </label>
+              <label
+                class="flex items-start p-5 bg-white/80 dark:bg-dark-800/80 rounded-2xl border border-gray-200 dark:border-dark-600 cursor-pointer card-hover transition-all duration-300 hover:border-primary-300 dark:hover:border-primary-500 backdrop-blur-sm"
+              >
+                <input
+                  type="checkbox"
+                  id="includeCoverGen"
+                  class="mt-1 w-5 h-5 text-primary-600 bg-gray-100 dark:bg-dark-700 border-gray-300 dark:border-dark-500 rounded focus:ring-primary-500 dark:focus:ring-primary-400 focus:ring-2"
+                />
+                <div class="ml-4">
+                  <div
+                    class="font-semibold text-gray-900 dark:text-white flex items-center"
+                  >
+                    ✅ Cover Letter Generator
+                  </div>
+                  <div class="text-sm text-gray-600 dark:text-dark-300">
+                    Optionally generate a personalized cover letter using the
+                    same analysis.
+                  </div>
+                </div>
+              </label>
+              <label
+                class="flex items-start p-5 bg-white/80 dark:bg-dark-800/80 rounded-2xl border border-gray-200 dark:border-dark-600 cursor-pointer card-hover transition-all duration-300 hover:border-primary-300 dark:hover:border-primary-500 backdrop-blur-sm"
+              >
+                <input
+                  type="checkbox"
+                  id="includeLinkedInGen"
+                  class="mt-1 w-5 h-5 text-primary-600 bg-gray-100 dark:bg-dark-700 border-gray-300 dark:border-dark-500 rounded focus:ring-primary-500 dark:focus:ring-primary-400 focus:ring-2"
+                />
+                <div class="ml-4">
+                  <div
+                    class="font-semibold text-gray-900 dark:text-white flex items-center"
+                  >
+                    ✅ LinkedIn Summary Optimizer
+                  </div>
+                  <div class="text-sm text-gray-600 dark:text-dark-300">
+                    Use resume content to suggest a strong LinkedIn "About"
+                    section.
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
           <!-- Step 4: Start Analysis -->
           <div class="space-y-6">
             <div class="flex items-center mb-6">

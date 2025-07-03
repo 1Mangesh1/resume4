@@ -104,7 +104,8 @@ const cleanupFile = async (filePath) => {
 const createAnalysisPrompt = (
   resumeText,
   jobDescription = null,
-  options = {}
+  options = {},
+  generatorOptions = {}
 ) => {
   let prompt = `You are an expert resume reviewer and career coach with deep expertise in recruitment, HR practices, and professional communication. Please analyze the following resume and provide detailed, actionable feedback across multiple dimensions.
 
@@ -269,8 +270,20 @@ ${jobDescription ? "- Prioritize recommendations that improve job fit" : ""}
 - Score advanced analysis sections independently
 - Provide constructive criticism with clear improvement paths
 
-Return ONLY the JSON object, no additional text.`;
-
+`;
+  if (generatorOptions.includeSummaryGen) {
+    prompt += `\nAdditionally, generate a professional resume summary/introduction (2-4 sentences) tailored to the candidate's background and target role. Return as 'resume_summary'.`;
+  }
+  if (generatorOptions.includeVariantGen) {
+    prompt += `\nIf a job description is provided, generate a tailored version of the resume (rewrite bullets, suggest reordering) to maximize fit. Return as 'tailored_resume'.`;
+  }
+  if (generatorOptions.includeCoverGen) {
+    prompt += `\nGenerate a personalized cover letter based on the resume and (if provided) the job description. Return as 'cover_letter'.`;
+  }
+  if (generatorOptions.includeLinkedInGen) {
+    prompt += `\nGenerate a strong LinkedIn 'About' summary based on the resume. Return as 'linkedin_summary'.`;
+  }
+  prompt += `\nReturn ONLY the JSON object, no additional text.`;
   return prompt;
 };
 
@@ -336,8 +349,21 @@ app.post("/api/analyze", upload.single("resumeFile"), async (req, res) => {
     // Get job description if provided
     const jobDescription = req.body.jobDescription?.trim() || null;
 
+    // Get generator options
+    const generatorOptions = {
+      includeSummaryGen: req.body.includeSummaryGen === "true",
+      includeVariantGen: req.body.includeVariantGen === "true",
+      includeCoverGen: req.body.includeCoverGen === "true",
+      includeLinkedInGen: req.body.includeLinkedInGen === "true",
+    };
+
     // Create the enhanced prompt
-    const prompt = createAnalysisPrompt(resumeText, jobDescription, options);
+    const prompt = createAnalysisPrompt(
+      resumeText,
+      jobDescription,
+      options,
+      generatorOptions
+    );
 
     // Call Gemini API
     const response = await fetch(
@@ -446,6 +472,10 @@ app.post("/api/analyze", upload.single("resumeFile"), async (req, res) => {
           "Consider reformatting your resume",
           "Add more quantified achievements",
         ],
+        resume_summary: generatorOptions.includeSummaryGen ? "" : undefined,
+        tailored_resume: generatorOptions.includeVariantGen ? "" : undefined,
+        cover_letter: generatorOptions.includeCoverGen ? "" : undefined,
+        linkedin_summary: generatorOptions.includeLinkedInGen ? "" : undefined,
       };
 
       if (jobDescription) {
