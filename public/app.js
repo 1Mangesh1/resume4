@@ -158,54 +158,168 @@ function dismissProTipPermanently() {
   localStorage.setItem("proTipDismissed", "true");
 }
 
-// Event Listeners
-analyzeBtn.addEventListener("click", analyzeResume);
-clearBtn.addEventListener("click", clearForm);
-textInputTab.addEventListener("click", () => switchInputMethod("text"));
-fileInputTab.addEventListener("click", () => switchInputMethod("file"));
-resumeFile.addEventListener("change", handleFileSelect);
-fileDropZone.addEventListener("click", () => resumeFile.click());
-
-// Dark mode toggle
-themeToggle.addEventListener("click", toggleTheme);
-
-// Pro tip toast listeners
-dismissProTip.addEventListener("click", dismissProTipPermanently);
-
-// Initialize theme on page load
+// Initialize theme immediately (doesn't require DOM)
 initializeTheme();
 
-// Show pro tip on page load (if not dismissed)
-showProTip();
-
-// Initialize Vercel Analytics
+// Initialize Vercel Analytics immediately
 if (typeof window !== "undefined" && window.va) {
   // Track page view
   window.va("pageview");
 }
 
-// Auto-check JD matching when job description is entered
-jobDescription.addEventListener("input", function () {
-  if (this.value.trim().length > 50 && !includeJDMatch.checked) {
-    includeJDMatch.checked = true;
-    toggleJobDescriptionSection(); // Trigger the section to show
-  }
-});
+// Wait for DOM to be ready before attaching event listeners
+document.addEventListener("DOMContentLoaded", function () {
+  // Event Listeners - Ensure DOM elements exist first
+  if (analyzeBtn) analyzeBtn.addEventListener("click", analyzeResume);
+  if (clearBtn) clearBtn.addEventListener("click", clearForm);
+  if (textInputTab)
+    textInputTab.addEventListener("click", () => switchInputMethod("text"));
+  if (fileInputTab)
+    fileInputTab.addEventListener("click", () => switchInputMethod("file"));
+  if (resumeFile) resumeFile.addEventListener("change", handleFileSelect);
+  if (fileDropZone)
+    fileDropZone.addEventListener("click", () => resumeFile.click());
 
-// Show pro tip when job description is focused (if not permanently dismissed)
-jobDescription.addEventListener("focus", function () {
-  if (!localStorage.getItem("proTipDismissed")) {
-    // Reset display style in case it was hidden
-    proTipToast.style.display = "block";
-    setTimeout(() => {
-      proTipToast.classList.remove("translate-x-full");
-      proTipToast.classList.add("translate-x-0");
-    }, 500);
-  }
-});
+  // Dark mode toggle
+  if (themeToggle) themeToggle.addEventListener("click", toggleTheme);
 
-// Job Description Matching checkbox toggle
-includeJDMatch.addEventListener("change", toggleJobDescriptionSection);
+  // Pro tip toast listeners
+  if (dismissProTip)
+    dismissProTip.addEventListener("click", dismissProTipPermanently);
+
+  // Auto-check JD matching when job description is entered
+  if (jobDescription) {
+    jobDescription.addEventListener("input", function () {
+      if (this.value.trim().length > 50 && !includeJDMatch.checked) {
+        includeJDMatch.checked = true;
+        toggleJobDescriptionSection(); // Trigger the section to show
+      }
+    });
+
+    // Show pro tip when job description is focused (if not permanently dismissed)
+    jobDescription.addEventListener("focus", function () {
+      if (!localStorage.getItem("proTipDismissed")) {
+        // Reset display style in case it was hidden
+        proTipToast.style.display = "block";
+        setTimeout(() => {
+          proTipToast.classList.remove("translate-x-full");
+          proTipToast.classList.add("translate-x-0");
+        }, 500);
+      }
+    });
+  }
+
+  // Job Description Matching checkbox toggle
+  if (includeJDMatch)
+    includeJDMatch.addEventListener("change", toggleJobDescriptionSection);
+
+  // File drag and drop
+  if (fileDropZone) {
+    fileDropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      fileDropZone.parentElement.classList.add(
+        "border-primary-300",
+        "bg-primary-50/50"
+      );
+      fileDropZone.parentElement.classList.remove("border-gray-200");
+    });
+
+    fileDropZone.addEventListener("dragleave", (e) => {
+      e.preventDefault();
+      fileDropZone.parentElement.classList.remove(
+        "border-primary-300",
+        "bg-primary-50/50"
+      );
+      fileDropZone.parentElement.classList.add("border-gray-200");
+    });
+
+    fileDropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      fileDropZone.parentElement.classList.remove(
+        "border-primary-300",
+        "bg-primary-50/50"
+      );
+      fileDropZone.parentElement.classList.add("border-gray-200");
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleFileSelect({ target: { files } });
+      }
+    });
+  }
+
+  // Floating label functionality
+  const textareas = document.querySelectorAll(".textarea-focus");
+
+  textareas.forEach((textarea) => {
+    // Handle focus/blur states
+    textarea.addEventListener("focus", function () {
+      this.parentElement.classList.add("focused");
+    });
+
+    textarea.addEventListener("blur", function () {
+      this.parentElement.classList.remove("focused");
+    });
+
+    // Handle content state
+    textarea.addEventListener("input", function () {
+      if (this.value.trim() !== "") {
+        this.classList.add("has-content");
+      } else {
+        this.classList.remove("has-content");
+      }
+    });
+
+    // Check initial state
+    if (textarea.value.trim() !== "") {
+      textarea.classList.add("has-content");
+    }
+  });
+
+  // Enhanced smooth scroll for results
+  function smoothScrollToResults() {
+    const element = document.getElementById("resultsSection");
+    if (element && !element.classList.contains("hidden")) {
+      setTimeout(() => {
+        element.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+          inline: "nearest",
+        });
+      }, 1600);
+    }
+  }
+
+  // Override showResults to include smooth scroll
+  const originalShowResults = showResults;
+  window.showResults = function (data) {
+    originalShowResults(data);
+    smoothScrollToResults();
+  };
+
+  // Add subtle hover animations to checkboxes
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach((checkbox) => {
+    checkbox.addEventListener("change", function () {
+      this.parentElement.classList.toggle("scale-105", this.checked);
+    });
+  });
+
+  // Add loading animation to progress bars
+  const progressBars = document.querySelectorAll(".progress-bar");
+  progressBars.forEach((bar) => {
+    bar.addEventListener("transitionstart", function () {
+      this.classList.add("animate-pulse-soft");
+    });
+    bar.addEventListener("transitionend", function () {
+      this.classList.remove("animate-pulse-soft");
+    });
+  });
+
+  // Show pro tip on page load (if not dismissed) - after DOM is ready
+  showProTip();
+
+  console.log("✨ Professional Resume Analyzer UI initialized successfully!");
+});
 
 // Job Description Section Toggle Function
 function toggleJobDescriptionSection() {
@@ -246,38 +360,6 @@ function toggleJobDescriptionSection() {
     jobDescription.value = "";
   }
 }
-
-// File drag and drop
-fileDropZone.addEventListener("dragover", (e) => {
-  e.preventDefault();
-  fileDropZone.parentElement.classList.add(
-    "border-primary-300",
-    "bg-primary-50/50"
-  );
-  fileDropZone.parentElement.classList.remove("border-gray-200");
-});
-
-fileDropZone.addEventListener("dragleave", (e) => {
-  e.preventDefault();
-  fileDropZone.parentElement.classList.remove(
-    "border-primary-300",
-    "bg-primary-50/50"
-  );
-  fileDropZone.parentElement.classList.add("border-gray-200");
-});
-
-fileDropZone.addEventListener("drop", (e) => {
-  e.preventDefault();
-  fileDropZone.parentElement.classList.remove(
-    "border-primary-300",
-    "bg-primary-50/50"
-  );
-  fileDropZone.parentElement.classList.add("border-gray-200");
-  const files = e.dataTransfer.files;
-  if (files.length > 0) {
-    handleFileSelect({ target: { files } });
-  }
-});
 
 // Switch between input methods
 function switchInputMethod(method) {
@@ -829,76 +911,3 @@ function showSampleResults() {
 
 // For development - remove in production
 // analyzeBtn.addEventListener('dblclick', showSampleResults);
-
-// Initialize UI enhancements when DOM loads
-document.addEventListener("DOMContentLoaded", function () {
-  // Floating label functionality
-  const textareas = document.querySelectorAll(".textarea-focus");
-
-  textareas.forEach((textarea) => {
-    // Handle focus/blur states
-    textarea.addEventListener("focus", function () {
-      this.parentElement.classList.add("focused");
-    });
-
-    textarea.addEventListener("blur", function () {
-      this.parentElement.classList.remove("focused");
-    });
-
-    // Handle content state
-    textarea.addEventListener("input", function () {
-      if (this.value.trim() !== "") {
-        this.classList.add("has-content");
-      } else {
-        this.classList.remove("has-content");
-      }
-    });
-
-    // Check initial state
-    if (textarea.value.trim() !== "") {
-      textarea.classList.add("has-content");
-    }
-  });
-
-  // Enhanced smooth scroll for results
-  function smoothScrollToResults() {
-    const element = document.getElementById("resultsSection");
-    if (element && !element.classList.contains("hidden")) {
-      setTimeout(() => {
-        element.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-          inline: "nearest",
-        });
-      }, 1600);
-    }
-  }
-
-  // Override showResults to include smooth scroll
-  const originalShowResults = showResults;
-  window.showResults = function (data) {
-    originalShowResults(data);
-    smoothScrollToResults();
-  };
-
-  // Add subtle hover animations to checkboxes
-  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-  checkboxes.forEach((checkbox) => {
-    checkbox.addEventListener("change", function () {
-      this.parentElement.classList.toggle("scale-105", this.checked);
-    });
-  });
-
-  // Add loading animation to progress bars
-  const progressBars = document.querySelectorAll(".progress-bar");
-  progressBars.forEach((bar) => {
-    bar.addEventListener("transitionstart", function () {
-      this.classList.add("animate-pulse-soft");
-    });
-    bar.addEventListener("transitionend", function () {
-      this.classList.remove("animate-pulse-soft");
-    });
-  });
-
-  console.log("✨ Professional Resume Analyzer UI initialized successfully!");
-});
