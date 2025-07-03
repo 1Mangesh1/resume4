@@ -84,9 +84,59 @@ const advancedInsights = document.getElementById("advancedInsights");
 const strengthsList = document.getElementById("strengthsList");
 const suggestionsList = document.getElementById("suggestionsList");
 
+// Theme and UI elements
+const themeToggle = document.getElementById("themeToggle");
+const proTipToast = document.getElementById("proTipToast");
+const dismissProTip = document.getElementById("dismissProTip");
+
 // Global variables
 let currentInputMethod = "text";
 let selectedFile = null;
+
+// Dark Mode Functionality
+function initializeTheme() {
+  // Check for saved theme preference or default to light mode
+  const savedTheme = localStorage.getItem("theme");
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+  if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+}
+
+function toggleTheme() {
+  const isDark = document.documentElement.classList.contains("dark");
+
+  if (isDark) {
+    document.documentElement.classList.remove("dark");
+    localStorage.setItem("theme", "light");
+  } else {
+    document.documentElement.classList.add("dark");
+    localStorage.setItem("theme", "dark");
+  }
+}
+
+// Pro Tip Toast Functionality
+function showProTip() {
+  if (!localStorage.getItem("proTipDismissed")) {
+    setTimeout(() => {
+      proTipToast.classList.remove("translate-x-full");
+      proTipToast.classList.add("translate-x-0");
+    }, 2000); // Show after 2 seconds
+  }
+}
+
+function hideProTip() {
+  proTipToast.classList.remove("translate-x-0");
+  proTipToast.classList.add("translate-x-full");
+}
+
+function dismissProTipPermanently() {
+  hideProTip();
+  localStorage.setItem("proTipDismissed", "true");
+}
 
 // Event Listeners
 analyzeBtn.addEventListener("click", analyzeResume);
@@ -96,10 +146,32 @@ fileInputTab.addEventListener("click", () => switchInputMethod("file"));
 resumeFile.addEventListener("change", handleFileSelect);
 fileDropZone.addEventListener("click", () => resumeFile.click());
 
+// Dark mode toggle
+themeToggle.addEventListener("click", toggleTheme);
+
+// Pro tip toast listeners
+dismissProTip.addEventListener("click", dismissProTipPermanently);
+
+// Initialize theme on page load
+initializeTheme();
+
+// Show pro tip on page load (if not dismissed)
+showProTip();
+
 // Auto-check JD matching when job description is entered
 jobDescription.addEventListener("input", function () {
   if (this.value.trim().length > 50) {
     includeJDMatch.checked = true;
+  }
+});
+
+// Show pro tip when job description is focused (if not permanently dismissed)
+jobDescription.addEventListener("focus", function () {
+  if (!localStorage.getItem("proTipDismissed")) {
+    setTimeout(() => {
+      proTipToast.classList.remove("translate-x-full");
+      proTipToast.classList.add("translate-x-0");
+    }, 500);
   }
 });
 
