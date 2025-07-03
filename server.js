@@ -10,9 +10,9 @@ const mammoth = require("mammoth");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configure multer for file uploads
+// Configure multer for file uploads (use /tmp for serverless environments)
 const upload = multer({
-  dest: "uploads/",
+  dest: "/tmp/uploads/",
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
@@ -39,12 +39,12 @@ app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static("public"));
 
-// Ensure uploads directory exists
+// Ensure uploads directory exists in /tmp (writable in serverless)
 const ensureUploadsDir = async () => {
   try {
-    await fs.access("uploads");
+    await fs.access("/tmp/uploads");
   } catch {
-    await fs.mkdir("uploads");
+    await fs.mkdir("/tmp/uploads", { recursive: true });
   }
 };
 
