@@ -24,6 +24,10 @@ const includeKeywords = document.getElementById("includeKeywords");
 const includeATS = document.getElementById("includeATS");
 const includeJDMatch = document.getElementById("includeJDMatch");
 
+// Job Description Section elements
+const jobDescriptionSection = document.getElementById("jobDescriptionSection");
+const inputGrid = document.getElementById("inputGrid");
+
 // Result elements
 const overallScore = document.getElementById("overallScore");
 const overallProgress = document.getElementById("overallProgress");
@@ -170,8 +174,9 @@ showProTip();
 
 // Auto-check JD matching when job description is entered
 jobDescription.addEventListener("input", function () {
-  if (this.value.trim().length > 50) {
+  if (this.value.trim().length > 50 && !includeJDMatch.checked) {
     includeJDMatch.checked = true;
+    toggleJobDescriptionSection(); // Trigger the section to show
   }
 });
 
@@ -187,16 +192,43 @@ jobDescription.addEventListener("focus", function () {
   }
 });
 
-// Textarea auto-resize
-resumeText.addEventListener("input", function () {
-  this.style.height = "auto";
-  this.style.height = this.scrollHeight + "px";
-});
+// Job Description Matching checkbox toggle
+includeJDMatch.addEventListener("change", toggleJobDescriptionSection);
 
-jobDescription.addEventListener("input", function () {
-  this.style.height = "auto";
-  this.style.height = this.scrollHeight + "px";
-});
+// Job Description Section Toggle Function
+function toggleJobDescriptionSection() {
+  const isChecked = includeJDMatch.checked;
+
+  if (isChecked) {
+    // Show job description section
+    jobDescriptionSection.classList.remove("hidden");
+    // Use setTimeout to ensure the element is rendered before animating
+    setTimeout(() => {
+      jobDescriptionSection.classList.remove("opacity-0", "translate-y-4");
+      jobDescriptionSection.classList.add("opacity-100", "translate-y-0");
+    }, 10);
+
+    // Change grid to 2 columns
+    inputGrid.classList.remove("lg:grid-cols-1");
+    inputGrid.classList.add("lg:grid-cols-2");
+  } else {
+    // Hide job description section
+    jobDescriptionSection.classList.remove("opacity-100", "translate-y-0");
+    jobDescriptionSection.classList.add("opacity-0", "translate-y-4");
+
+    // Hide after animation completes
+    setTimeout(() => {
+      jobDescriptionSection.classList.add("hidden");
+    }, 500);
+
+    // Change grid to 1 column
+    inputGrid.classList.remove("lg:grid-cols-2");
+    inputGrid.classList.add("lg:grid-cols-1");
+
+    // Clear job description content when hidden
+    jobDescription.value = "";
+  }
+}
 
 // File drag and drop
 fileDropZone.addEventListener("dragover", (e) => {
@@ -302,6 +334,10 @@ function clearForm() {
   selectedFile = null;
   resumeFile.value = "";
 
+  // Reset checkboxes and hide job description section
+  includeJDMatch.checked = false;
+  toggleJobDescriptionSection();
+
   // Reset file input section
   fileInfo.classList.add("hidden");
   fileDropZone.innerHTML = `
@@ -316,10 +352,6 @@ function clearForm() {
   `;
 
   hideAllStates();
-
-  // Reset textarea heights for floating labels
-  resumeText.style.height = "auto";
-  jobDescription.style.height = "auto";
 }
 
 // Hide all states
