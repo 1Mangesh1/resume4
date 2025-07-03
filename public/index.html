@@ -518,11 +518,11 @@
 
             <!-- Input Method Toggle -->
             <div
-              class="flex p-1.5 bg-gray-100 dark:bg-dark-700 rounded-2xl shadow-inner max-w-md"
+              class="flex flex-col sm:flex-row p-1.5 bg-gray-100 dark:bg-dark-700 rounded-2xl shadow-inner max-w-md w-full mx-auto gap-2 sm:gap-0"
             >
               <button
                 id="textInputTab"
-                class="tab-active flex-1 py-4 px-6 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center justify-center"
+                class="tab-inactive flex-1 py-4 px-6 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center justify-center w-full"
               >
                 <svg
                   class="w-5 h-5 mr-2"
@@ -541,7 +541,7 @@
               </button>
               <button
                 id="fileInputTab"
-                class="tab-inactive flex-1 py-4 px-6 rounded-xl font-semibold text-sm flex items-center justify-center"
+                class="tab-active flex-1 py-4 px-6 rounded-xl font-semibold text-sm flex items-center justify-center w-full"
               >
                 <svg
                   class="w-5 h-5 mr-2"
@@ -561,13 +561,13 @@
             </div>
 
             <!-- Input Content Container -->
-            <div class="h-80">
+            <div class="h-80 w-full max-w-md mx-auto mt-4">
               <!-- Text Input Method -->
-              <div id="textInputSection" class="relative h-full">
+              <div id="textInputSection" class="relative h-full hidden">
                 <textarea
                   id="resumeText"
                   rows="20"
-                  class="textarea-focus w-full h-full px-6 py-6 border-2 border-gray-200 dark:border-dark-600 bg-white/90 dark:bg-dark-800/90 rounded-2xl shadow-soft dark:shadow-dark-soft resize-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-300 dark:focus:border-primary-500 focus:outline-none transition-all duration-300 text-gray-700 dark:text-dark-200 backdrop-blur-sm overflow-y-auto"
+                  class="textarea-focus w-full h-full px-6 py-6 border-2 border-gray-200 dark:border-dark-600 bg-white/90 dark:bg-dark-800/90 rounded-2xl shadow-soft dark:shadow-dark-soft resize-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-300 dark:focus:border-primary-500 focus:outline-none transition-all duration-300 text-gray-700 dark:text-dark-200 backdrop-blur-sm overflow-y-auto text-base sm:text-lg"
                   placeholder=" "
                 ></textarea>
                 <label
@@ -578,7 +578,7 @@
               </div>
 
               <!-- File Input Method -->
-              <div id="fileInputSection" class="hidden h-full">
+              <div id="fileInputSection" class="h-full">
                 <div
                   class="border-2 border-dashed border-gray-200 dark:border-dark-600 rounded-2xl bg-white/90 dark:bg-dark-800/90 hover:border-primary-300 dark:hover:border-primary-500 hover:bg-primary-50/30 dark:hover:bg-primary-900/30 transition-all duration-300 cursor-pointer card-hover backdrop-blur-sm h-full flex flex-col shadow-soft dark:shadow-dark-soft"
                 >

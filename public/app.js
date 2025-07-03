@@ -34,7 +34,7 @@ let advancedInsights, strengthsList, suggestionsList;
 let themeToggle, proTipToast, dismissProTip;
 
 // Global variables
-let currentInputMethod = "text";
+let currentInputMethod = "file";
 let selectedFile = null;
 
 // Dark Mode Functionality
@@ -350,6 +350,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Show pro tip on page load (if not dismissed) - after DOM is ready
   showProTip();
+
+  // Set file input as default
+  switchInputMethod("file");
 
   console.log("✨ Professional Resume Analyzer UI initialized successfully!");
 });
