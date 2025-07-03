@@ -1,97 +1,37 @@
-// DOM Elements
-const resumeText = document.getElementById("resumeText");
-const resumeFile = document.getElementById("resumeFile");
-const jobDescription = document.getElementById("jobDescription");
-const analyzeBtn = document.getElementById("analyzeBtn");
-const clearBtn = document.getElementById("clearBtn");
-const loadingState = document.getElementById("loadingState");
-const errorState = document.getElementById("errorState");
-const errorMessage = document.getElementById("errorMessage");
-const resultsSection = document.getElementById("resultsSection");
+// DOM Elements - will be initialized after DOM loads
+let resumeText, resumeFile, jobDescription, analyzeBtn, clearBtn;
+let loadingState, errorState, errorMessage, resultsSection;
 
-// Tab elements
-const textInputTab = document.getElementById("textInputTab");
-const fileInputTab = document.getElementById("fileInputTab");
-const textInputSection = document.getElementById("textInputSection");
-const fileInputSection = document.getElementById("fileInputSection");
-const fileDropZone = document.getElementById("fileDropZone");
-const fileInfo = document.getElementById("fileInfo");
-const fileName = document.getElementById("fileName");
-const fileSize = document.getElementById("fileSize");
+// Tab elements and other DOM elements - will be initialized after DOM loads
+let textInputTab, fileInputTab, textInputSection, fileInputSection;
+let fileDropZone, fileInfo, fileName, fileSize;
+let includeKeywords, includeATS, includeJDMatch;
+let jobDescriptionSection, inputGrid;
 
-// Analysis option checkboxes
-const includeKeywords = document.getElementById("includeKeywords");
-const includeATS = document.getElementById("includeATS");
-const includeJDMatch = document.getElementById("includeJDMatch");
+// Result elements - will be initialized after DOM loads
+let overallScore,
+  overallProgress,
+  clarityScore,
+  clarityProgress,
+  clarityFeedback;
+let impactScore,
+  impactProgress,
+  impactFeedback,
+  atsScore,
+  atsProgress,
+  atsFeedback;
+let formattingScore, formattingProgress, formattingFeedback;
 
-// Job Description Section elements
-const jobDescriptionSection = document.getElementById("jobDescriptionSection");
-const inputGrid = document.getElementById("inputGrid");
-
-// Result elements
-const overallScore = document.getElementById("overallScore");
-const overallProgress = document.getElementById("overallProgress");
-const clarityScore = document.getElementById("clarityScore");
-const clarityProgress = document.getElementById("clarityProgress");
-const clarityFeedback = document.getElementById("clarityFeedback");
-const impactScore = document.getElementById("impactScore");
-const impactProgress = document.getElementById("impactProgress");
-const impactFeedback = document.getElementById("impactFeedback");
-const atsScore = document.getElementById("atsScore");
-const atsProgress = document.getElementById("atsProgress");
-const atsFeedback = document.getElementById("atsFeedback");
-const formattingScore = document.getElementById("formattingScore");
-const formattingProgress = document.getElementById("formattingProgress");
-const formattingFeedback = document.getElementById("formattingFeedback");
-
-// JD-specific elements
-const jdMatchSection = document.getElementById("jdMatchSection");
-const jdMatchScore = document.getElementById("jdMatchScore");
-const jdMatchProgress = document.getElementById("jdMatchProgress");
-const jdMatchFeedback = document.getElementById("jdMatchFeedback");
-const jdRecommendationsSection = document.getElementById(
-  "jdRecommendationsSection"
-);
-const jdRecommendationsList = document.getElementById("jdRecommendationsList");
-
-// Advanced Analysis elements
-const toneScore = document.getElementById("toneScore");
-const toneProgress = document.getElementById("toneProgress");
-const toneType = document.getElementById("toneType");
-const toneFeedback = document.getElementById("toneFeedback");
-
-const bulletScore = document.getElementById("bulletScore");
-const bulletProgress = document.getElementById("bulletProgress");
-const actionVerbs = document.getElementById("actionVerbs");
-const quantifiedBullets = document.getElementById("quantifiedBullets");
-const bulletFeedback = document.getElementById("bulletFeedback");
-
-const buzzwordScore = document.getElementById("buzzwordScore");
-const buzzwordProgress = document.getElementById("buzzwordProgress");
-const buzzwordCount = document.getElementById("buzzwordCount");
-const buzzwordList = document.getElementById("buzzwordList");
-
-const redFlagScore = document.getElementById("redFlagScore");
-const redFlagProgress = document.getElementById("redFlagProgress");
-const redFlagCount = document.getElementById("redFlagCount");
-const redFlagList = document.getElementById("redFlagList");
-
-const skillsScore = document.getElementById("skillsScore");
-const skillsProgress = document.getElementById("skillsProgress");
-const hardSkills = document.getElementById("hardSkills");
-const softSkills = document.getElementById("softSkills");
-const skillsRatio = document.getElementById("skillsRatio");
-
-const advancedInsights = document.getElementById("advancedInsights");
-
-// Lists
-const strengthsList = document.getElementById("strengthsList");
-const suggestionsList = document.getElementById("suggestionsList");
-
-// Theme and UI elements
-const themeToggle = document.getElementById("themeToggle");
-const proTipToast = document.getElementById("proTipToast");
-const dismissProTip = document.getElementById("dismissProTip");
+// All other elements - will be initialized after DOM loads
+let jdMatchSection, jdMatchScore, jdMatchProgress, jdMatchFeedback;
+let jdRecommendationsSection, jdRecommendationsList;
+let toneScore, toneProgress, toneType, toneFeedback;
+let bulletScore, bulletProgress, actionVerbs, quantifiedBullets, bulletFeedback;
+let buzzwordScore, buzzwordProgress, buzzwordCount, buzzwordList;
+let redFlagScore, redFlagProgress, redFlagCount, redFlagList;
+let skillsScore, skillsProgress, hardSkills, softSkills, skillsRatio;
+let advancedInsights, strengthsList, suggestionsList;
+let themeToggle, proTipToast, dismissProTip;
 
 // Global variables
 let currentInputMethod = "text";
@@ -169,8 +109,98 @@ if (typeof window !== "undefined" && window.va) {
 
 // Wait for DOM to be ready before attaching event listeners
 document.addEventListener("DOMContentLoaded", function () {
+  // Initialize all DOM elements
+  resumeText = document.getElementById("resumeText");
+  resumeFile = document.getElementById("resumeFile");
+  jobDescription = document.getElementById("jobDescription");
+  analyzeBtn = document.getElementById("analyzeBtn");
+  clearBtn = document.getElementById("clearBtn");
+  loadingState = document.getElementById("loadingState");
+  errorState = document.getElementById("errorState");
+  errorMessage = document.getElementById("errorMessage");
+  resultsSection = document.getElementById("resultsSection");
+
+  // Tab elements
+  textInputTab = document.getElementById("textInputTab");
+  fileInputTab = document.getElementById("fileInputTab");
+  textInputSection = document.getElementById("textInputSection");
+  fileInputSection = document.getElementById("fileInputSection");
+  fileDropZone = document.getElementById("fileDropZone");
+  fileInfo = document.getElementById("fileInfo");
+  fileName = document.getElementById("fileName");
+  fileSize = document.getElementById("fileSize");
+
+  // Analysis option checkboxes
+  includeKeywords = document.getElementById("includeKeywords");
+  includeATS = document.getElementById("includeATS");
+  includeJDMatch = document.getElementById("includeJDMatch");
+
+  // Job Description Section elements
+  jobDescriptionSection = document.getElementById("jobDescriptionSection");
+  inputGrid = document.getElementById("inputGrid");
+
+  // Result elements
+  overallScore = document.getElementById("overallScore");
+  overallProgress = document.getElementById("overallProgress");
+  clarityScore = document.getElementById("clarityScore");
+  clarityProgress = document.getElementById("clarityProgress");
+  clarityFeedback = document.getElementById("clarityFeedback");
+  impactScore = document.getElementById("impactScore");
+  impactProgress = document.getElementById("impactProgress");
+  impactFeedback = document.getElementById("impactFeedback");
+  atsScore = document.getElementById("atsScore");
+  atsProgress = document.getElementById("atsProgress");
+  atsFeedback = document.getElementById("atsFeedback");
+  formattingScore = document.getElementById("formattingScore");
+  formattingProgress = document.getElementById("formattingProgress");
+  formattingFeedback = document.getElementById("formattingFeedback");
+
+  // JD-specific elements
+  jdMatchSection = document.getElementById("jdMatchSection");
+  jdMatchScore = document.getElementById("jdMatchScore");
+  jdMatchProgress = document.getElementById("jdMatchProgress");
+  jdMatchFeedback = document.getElementById("jdMatchFeedback");
+  jdRecommendationsSection = document.getElementById(
+    "jdRecommendationsSection"
+  );
+  jdRecommendationsList = document.getElementById("jdRecommendationsList");
+
+  // Advanced Analysis elements
+  toneScore = document.getElementById("toneScore");
+  toneProgress = document.getElementById("toneProgress");
+  toneType = document.getElementById("toneType");
+  toneFeedback = document.getElementById("toneFeedback");
+  bulletScore = document.getElementById("bulletScore");
+  bulletProgress = document.getElementById("bulletProgress");
+  actionVerbs = document.getElementById("actionVerbs");
+  quantifiedBullets = document.getElementById("quantifiedBullets");
+  bulletFeedback = document.getElementById("bulletFeedback");
+  buzzwordScore = document.getElementById("buzzwordScore");
+  buzzwordProgress = document.getElementById("buzzwordProgress");
+  buzzwordCount = document.getElementById("buzzwordCount");
+  buzzwordList = document.getElementById("buzzwordList");
+  redFlagScore = document.getElementById("redFlagScore");
+  redFlagProgress = document.getElementById("redFlagProgress");
+  redFlagCount = document.getElementById("redFlagCount");
+  redFlagList = document.getElementById("redFlagList");
+  skillsScore = document.getElementById("skillsScore");
+  skillsProgress = document.getElementById("skillsProgress");
+  hardSkills = document.getElementById("hardSkills");
+  softSkills = document.getElementById("softSkills");
+  skillsRatio = document.getElementById("skillsRatio");
+  advancedInsights = document.getElementById("advancedInsights");
+  strengthsList = document.getElementById("strengthsList");
+  suggestionsList = document.getElementById("suggestionsList");
+
+  // Theme and UI elements
+  themeToggle = document.getElementById("themeToggle");
+  proTipToast = document.getElementById("proTipToast");
+  dismissProTip = document.getElementById("dismissProTip");
+
   // Event Listeners - Ensure DOM elements exist first
-  if (analyzeBtn) analyzeBtn.addEventListener("click", analyzeResume);
+  if (analyzeBtn) {
+    analyzeBtn.addEventListener("click", analyzeResume);
+  }
   if (clearBtn) clearBtn.addEventListener("click", clearForm);
   if (textInputTab)
     textInputTab.addEventListener("click", () => switchInputMethod("text"));
