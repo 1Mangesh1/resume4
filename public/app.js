@@ -5,7 +5,7 @@ let loadingState, errorState, errorMessage, resultsSection;
 // Tab elements and other DOM elements - will be initialized after DOM loads
 let textInputTab, fileInputTab, textInputSection, fileInputSection;
 let fileDropZone, fileInfo, fileName, fileSize;
-let includeKeywords, includeATS, includeJDMatch;
+let includeClarity, includeImpact, includeATS, includeJDMatch;
 let jobDescriptionSection, inputGrid;
 
 // Result elements - will be initialized after DOM loads
@@ -131,7 +131,8 @@ document.addEventListener("DOMContentLoaded", function () {
   fileSize = document.getElementById("fileSize");
 
   // Analysis option checkboxes
-  includeKeywords = document.getElementById("includeKeywords");
+  includeClarity = document.getElementById("includeClarity");
+  includeImpact = document.getElementById("includeImpact");
   includeATS = document.getElementById("includeATS");
   includeJDMatch = document.getElementById("includeJDMatch");
 
@@ -220,9 +221,11 @@ document.addEventListener("DOMContentLoaded", function () {
   // Auto-check JD matching when job description is entered
   if (jobDescription) {
     jobDescription.addEventListener("input", function () {
-      if (this.value.trim().length > 50 && !includeJDMatch.checked) {
-        includeJDMatch.checked = true;
-        toggleJobDescriptionSection(); // Trigger the section to show
+      if (this.value.trim().length > 50 && !includeJDMatch?.checked) {
+        if (includeJDMatch) {
+          includeJDMatch.checked = true;
+          toggleJobDescriptionSection(); // Trigger the section to show
+        }
       }
     });
 
@@ -353,7 +356,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Job Description Section Toggle Function
 function toggleJobDescriptionSection() {
-  const isChecked = includeJDMatch.checked;
+  const isChecked = includeJDMatch?.checked || false;
 
   // Track job description matching toggle
   if (window.va) {
@@ -477,7 +480,7 @@ function clearForm() {
   resumeFile.value = "";
 
   // Reset checkboxes and hide job description section
-  includeJDMatch.checked = false;
+  if (includeJDMatch) includeJDMatch.checked = false;
   toggleJobDescriptionSection();
 
   // Reset file input section
@@ -877,9 +880,10 @@ async function analyzeResume() {
       inputMethod: currentInputMethod,
       hasJobDescription: jobDescription.value.trim().length > 0,
       options: {
-        keywords: includeKeywords.checked,
-        ats: includeATS.checked,
-        jdMatch: includeJDMatch.checked,
+        clarity: includeClarity?.checked || false,
+        impact: includeImpact?.checked || false,
+        ats: includeATS?.checked || false,
+        jdMatch: includeJDMatch?.checked || false,
       },
     });
   }
@@ -902,11 +906,12 @@ async function analyzeResume() {
     }
 
     // Add analysis options
-    formData.append("includeKeywords", includeKeywords.checked);
-    formData.append("includeATS", includeATS.checked);
+    formData.append("includeClarity", includeClarity?.checked || false);
+    formData.append("includeImpact", includeImpact?.checked || false);
+    formData.append("includeATS", includeATS?.checked || false);
     formData.append(
       "includeJDMatch",
-      includeJDMatch.checked && jdText.length > 0
+      (includeJDMatch?.checked || false) && jdText.length > 0
     );
 
     const response = await fetch("/api/analyze", {

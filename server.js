@@ -209,8 +209,13 @@ Please respond with a JSON object containing the following structure:
 
 ANALYSIS FOCUS:
 ${
-  options.includeKeywords
-    ? "- Focus on keyword optimization for ATS systems\n"
+  options.includeClarity
+    ? "- Focus on clarity, readability, and structure\n"
+    : ""
+}
+${
+  options.includeImpact
+    ? "- Emphasize impact, achievements, and quantified results\n"
     : ""
 }
 ${options.includeATS ? "- Evaluate ATS compatibility and formatting\n" : ""}
@@ -322,7 +327,8 @@ app.post("/api/analyze", upload.single("resumeFile"), async (req, res) => {
 
     // Get analysis options
     const options = {
-      includeKeywords: req.body.includeKeywords === "true",
+      includeClarity: req.body.includeClarity === "true",
+      includeImpact: req.body.includeImpact === "true",
       includeATS: req.body.includeATS === "true",
       includeJDMatch: req.body.includeJDMatch === "true",
     };
