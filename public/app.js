@@ -112,6 +112,7 @@ function initializeTheme() {
 
 function toggleTheme() {
   const isDark = document.documentElement.classList.contains("dark");
+  const newTheme = isDark ? "light" : "dark";
 
   if (isDark) {
     document.documentElement.classList.remove("dark");
@@ -119,6 +120,11 @@ function toggleTheme() {
   } else {
     document.documentElement.classList.add("dark");
     localStorage.setItem("theme", "dark");
+  }
+
+  // Track theme change
+  if (window.va) {
+    window.va("track", "Theme Changed", { theme: newTheme });
   }
 }
 
@@ -172,6 +178,12 @@ initializeTheme();
 // Show pro tip on page load (if not dismissed)
 showProTip();
 
+// Initialize Vercel Analytics
+if (typeof window !== "undefined" && window.va) {
+  // Track page view
+  window.va("pageview");
+}
+
 // Auto-check JD matching when job description is entered
 jobDescription.addEventListener("input", function () {
   if (this.value.trim().length > 50 && !includeJDMatch.checked) {
@@ -198,6 +210,11 @@ includeJDMatch.addEventListener("change", toggleJobDescriptionSection);
 // Job Description Section Toggle Function
 function toggleJobDescriptionSection() {
   const isChecked = includeJDMatch.checked;
+
+  // Track job description matching toggle
+  if (window.va) {
+    window.va("track", "Job Description Matching", { enabled: isChecked });
+  }
 
   if (isChecked) {
     // Show job description section
@@ -266,6 +283,11 @@ fileDropZone.addEventListener("drop", (e) => {
 function switchInputMethod(method) {
   currentInputMethod = method;
 
+  // Track input method switch
+  if (window.va) {
+    window.va("track", "Input Method Changed", { method: method });
+  }
+
   if (method === "text") {
     textInputTab.classList.remove("tab-inactive");
     textInputTab.classList.add("tab-active");
@@ -308,6 +330,14 @@ function handleFileSelect(event) {
   }
 
   selectedFile = file;
+
+  // Track file upload
+  if (window.va) {
+    window.va("track", "File Uploaded", {
+      fileType: file.type,
+      fileSize: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+    });
+  }
 
   // Show file info
   fileName.textContent = file.name;
@@ -674,6 +704,19 @@ async function analyzeResume() {
     return;
   }
 
+  // Track resume analysis start
+  if (window.va) {
+    window.va("track", "Resume Analysis Started", {
+      inputMethod: currentInputMethod,
+      hasJobDescription: jobDescription.value.trim().length > 0,
+      options: {
+        keywords: includeKeywords.checked,
+        ats: includeATS.checked,
+        jdMatch: includeJDMatch.checked,
+      },
+    });
+  }
+
   showLoading();
 
   try {
@@ -715,9 +758,26 @@ async function analyzeResume() {
       return;
     }
 
+    // Track successful analysis completion
+    if (window.va) {
+      window.va("track", "Resume Analysis Completed", {
+        overallScore: data.overall_score || "unknown",
+        hasAdvancedAnalysis: !!data.advanced_analysis,
+        hasJDMatch: !!data.jd_match,
+      });
+    }
+
     showResults(data);
   } catch (error) {
     console.error("Analysis error:", error);
+
+    // Track analysis errors
+    if (window.va) {
+      window.va("track", "Resume Analysis Error", {
+        error: error.message || "Unknown error",
+      });
+    }
+
     showError(
       "Failed to analyze resume. Please check your connection and try again."
     );
