@@ -222,19 +222,33 @@
         color: #38bdf8;
       }
 
+      /* Fixed positioning for floating labels to prevent scroll interference */
       .floating-label {
+        position: absolute;
+        top: 1.5rem;
+        left: 1.5rem;
+        transform-origin: left top;
         transition: all 0.3s ease;
+        pointer-events: none;
+        z-index: 10;
       }
 
       .textarea-focus:focus + .floating-label,
       .textarea-focus:not(:placeholder-shown) + .floating-label {
         transform: translateY(-1.5rem) scale(0.85);
         color: #0ea5e9;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(12px);
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       }
 
       .dark .textarea-focus:focus + .floating-label,
       .dark .textarea-focus:not(:placeholder-shown) + .floating-label {
         color: #38bdf8;
+        background: rgba(30, 41, 59, 0.95);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
       }
 
       /* Dark mode toggle styles */
@@ -530,97 +544,100 @@
               </button>
             </div>
 
-            <!-- Text Input Method -->
-            <div id="textInputSection" class="relative">
-              <textarea
-                id="resumeText"
-                rows="20"
-                class="textarea-focus w-full h-96 px-6 py-6 border-0 bg-white/90 dark:bg-dark-800/90 rounded-2xl shadow-soft dark:shadow-dark-soft resize-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:outline-none transition-all duration-300 text-gray-700 dark:text-dark-200 backdrop-blur-sm overflow-y-auto"
-                placeholder=" "
-              ></textarea>
-              <label
-                class="floating-label absolute left-6 top-6 text-gray-500 dark:text-dark-400 font-medium pointer-events-none"
-              >
-                Paste your resume content here...
-              </label>
-            </div>
-
-            <!-- File Input Method -->
-            <div id="fileInputSection" class="hidden">
-              <div
-                class="border-2 border-dashed border-gray-200 dark:border-dark-600 rounded-2xl p-10 text-center bg-white/50 dark:bg-dark-800/50 hover:border-primary-300 dark:hover:border-primary-500 hover:bg-primary-50/30 dark:hover:bg-primary-900/30 transition-all duration-300 cursor-pointer card-hover backdrop-blur-sm h-96 flex flex-col justify-center"
-              >
-                <input
-                  type="file"
-                  id="resumeFile"
-                  accept=".pdf,.docx,.txt"
-                  class="hidden"
-                />
-                <div id="fileDropZone">
-                  <div
-                    class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-800 dark:to-primary-700 rounded-3xl mb-6 shadow-soft"
-                  >
-                    <svg
-                      class="w-10 h-10 text-primary-600 dark:text-primary-300"
-                      stroke="currentColor"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                      />
-                    </svg>
-                  </div>
-                  <h4
-                    class="text-xl font-bold text-gray-900 dark:text-white mb-3"
-                  >
-                    Drop your resume here
-                  </h4>
-                  <p class="text-gray-600 dark:text-dark-300 mb-2">
-                    or
-                    <span
-                      class="text-primary-600 dark:text-primary-400 font-semibold"
-                      >browse files</span
-                    >
-                  </p>
-                  <p class="text-sm text-gray-500 dark:text-dark-400">
-                    PDF, DOCX, or TXT • Max 10MB
-                  </p>
-                </div>
-                <div
-                  id="fileInfo"
-                  class="hidden mt-8 p-6 bg-primary-50 dark:bg-primary-900/50 rounded-2xl border border-primary-200 dark:border-primary-700 backdrop-blur-sm"
+            <!-- Input Content Container - Fixed Height -->
+            <div class="h-96">
+              <!-- Text Input Method -->
+              <div id="textInputSection" class="relative h-full">
+                <textarea
+                  id="resumeText"
+                  rows="20"
+                  class="textarea-focus w-full h-full px-6 py-6 border-0 bg-white/90 dark:bg-dark-800/90 rounded-2xl shadow-soft dark:shadow-dark-soft resize-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:outline-none transition-all duration-300 text-gray-700 dark:text-dark-200 backdrop-blur-sm overflow-y-auto"
+                  placeholder=" "
+                ></textarea>
+                <label
+                  class="floating-label text-gray-500 dark:text-dark-400 font-medium"
                 >
-                  <div class="flex items-center justify-center">
-                    <svg
-                      class="w-8 h-8 text-primary-600 dark:text-primary-400 mr-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                  Paste your resume content here...
+                </label>
+              </div>
+
+              <!-- File Input Method -->
+              <div id="fileInputSection" class="hidden h-full">
+                <div
+                  class="border-2 border-dashed border-gray-200 dark:border-dark-600 rounded-2xl p-8 text-center bg-white/50 dark:bg-dark-800/50 hover:border-primary-300 dark:hover:border-primary-500 hover:bg-primary-50/30 dark:hover:bg-primary-900/30 transition-all duration-300 cursor-pointer card-hover backdrop-blur-sm h-full flex flex-col justify-center"
+                >
+                  <input
+                    type="file"
+                    id="resumeFile"
+                    accept=".pdf,.docx,.txt"
+                    class="hidden"
+                  />
+                  <div id="fileDropZone">
+                    <div
+                      class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-800 dark:to-primary-700 rounded-3xl mb-6 shadow-soft"
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      ></path>
-                    </svg>
-                    <div class="text-left">
-                      <p
-                        id="fileName"
-                        class="font-bold text-primary-900 dark:text-primary-100 text-lg"
+                      <svg
+                        class="w-10 h-10 text-primary-600 dark:text-primary-300"
+                        stroke="currentColor"
+                        fill="none"
+                        viewBox="0 0 24 24"
                       >
-                        File Selected Successfully
-                      </p>
-                      <p
-                        id="fileSize"
-                        class="text-primary-700 dark:text-primary-300 font-medium"
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        />
+                      </svg>
+                    </div>
+                    <h4
+                      class="text-xl font-bold text-gray-900 dark:text-white mb-3"
+                    >
+                      Drop your resume here
+                    </h4>
+                    <p class="text-gray-600 dark:text-dark-300 mb-2">
+                      or
+                      <span
+                        class="text-primary-600 dark:text-primary-400 font-semibold"
+                        >browse files</span
                       >
-                        Ready for analysis
-                      </p>
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-dark-400">
+                      PDF, DOCX, or TXT • Max 10MB
+                    </p>
+                  </div>
+                  <div
+                    id="fileInfo"
+                    class="hidden mt-8 p-6 bg-primary-50 dark:bg-primary-900/50 rounded-2xl border border-primary-200 dark:border-primary-700 backdrop-blur-sm"
+                  >
+                    <div class="flex items-center justify-center">
+                      <svg
+                        class="w-8 h-8 text-primary-600 dark:text-primary-400 mr-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                      </svg>
+                      <div class="text-left">
+                        <p
+                          id="fileName"
+                          class="font-bold text-primary-900 dark:text-primary-100 text-lg"
+                        >
+                          File Selected Successfully
+                        </p>
+                        <p
+                          id="fileSize"
+                          class="text-primary-700 dark:text-primary-300 font-medium"
+                        >
+                          Ready for analysis
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -660,18 +677,21 @@
               >
             </h3>
 
-            <div class="relative">
-              <textarea
-                id="jobDescription"
-                rows="20"
-                class="textarea-focus w-full h-96 px-6 py-6 border-0 bg-white/90 dark:bg-dark-800/90 rounded-2xl shadow-soft dark:shadow-dark-soft resize-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 focus:outline-none transition-all duration-300 text-gray-700 dark:text-dark-200 backdrop-blur-sm overflow-y-auto"
-                placeholder=" "
-              ></textarea>
-              <label
-                class="floating-label absolute left-6 top-6 text-gray-500 dark:text-dark-400 font-medium pointer-events-none"
-              >
-                Paste job description for personalized feedback...
-              </label>
+            <!-- Job Description Content Container - Fixed Height -->
+            <div class="h-96">
+              <div class="relative h-full">
+                <textarea
+                  id="jobDescription"
+                  rows="20"
+                  class="textarea-focus w-full h-full px-6 py-6 border-0 bg-white/90 dark:bg-dark-800/90 rounded-2xl shadow-soft dark:shadow-dark-soft resize-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 focus:outline-none transition-all duration-300 text-gray-700 dark:text-dark-200 backdrop-blur-sm overflow-y-auto"
+                  placeholder=" "
+                ></textarea>
+                <label
+                  class="floating-label text-gray-500 dark:text-dark-400 font-medium"
+                >
+                  Paste job description for personalized feedback...
+                </label>
+              </div>
             </div>
           </div>
         </div>
