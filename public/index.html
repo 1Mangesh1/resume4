@@ -9,15 +9,30 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <!-- Vercel Analytics -->
+    <!-- Vercel Analytics - Only load in production -->
     <script>
       window.va =
         window.va ||
         function () {
           (window.vaq = window.vaq || []).push(arguments);
         };
+
+      // Only load Vercel analytics script in production
+      if (
+        window.location.hostname !== "localhost" &&
+        window.location.hostname !== "127.0.0.1"
+      ) {
+        const script = document.createElement("script");
+        script.defer = true;
+        script.src = "/_vercel/insights/script.js";
+        script.onerror = function () {
+          console.log(
+            "Vercel analytics script not available (expected in local development)"
+          );
+        };
+        document.head.appendChild(script);
+      }
     </script>
-    <script defer src="/_vercel/insights/script.js"></script>
     <script>
       tailwind.config = {
         darkMode: "class",

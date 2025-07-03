@@ -468,90 +468,115 @@ function clearForm() {
 
 // Hide all states
 function hideAllStates() {
-  loadingState.classList.add("hidden");
-  errorState.classList.add("hidden");
-  resultsSection.classList.add("hidden");
-  jdMatchSection.classList.add("hidden");
-  jdRecommendationsSection.classList.add("hidden");
+  if (loadingState) loadingState.classList.add("hidden");
+  if (errorState) errorState.classList.add("hidden");
+  if (resultsSection) resultsSection.classList.add("hidden");
+  if (jdMatchSection) jdMatchSection.classList.add("hidden");
+  if (jdRecommendationsSection)
+    jdRecommendationsSection.classList.add("hidden");
 }
 
 // Show loading state
 function showLoading() {
   hideAllStates();
-  loadingState.classList.remove("hidden");
-  analyzeBtn.disabled = true;
-  analyzeBtn.innerHTML = `
-    <svg class="w-5 h-5 inline mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-    </svg>
-    Analyzing...
-  `;
+  if (loadingState) loadingState.classList.remove("hidden");
+  if (analyzeBtn) {
+    analyzeBtn.disabled = true;
+    analyzeBtn.innerHTML = `
+      <svg class="w-5 h-5 inline mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      </svg>
+      Analyzing...
+    `;
+  }
 }
 
 // Show error state
 function showError(message) {
   hideAllStates();
-  errorMessage.textContent = message;
-  errorState.classList.remove("hidden");
-  analyzeBtn.disabled = false;
-  analyzeBtn.innerHTML = `
-    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-    </svg>
-    Analyze Resume
-  `;
+  if (errorMessage) errorMessage.textContent = message;
+  if (errorState) errorState.classList.remove("hidden");
+  if (analyzeBtn) {
+    analyzeBtn.disabled = false;
+    analyzeBtn.innerHTML = `
+      <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+      Analyze Resume
+    `;
+  }
 }
 
 // Show results
 function showResults(data) {
   hideAllStates();
-  resultsSection.classList.remove("hidden");
-  analyzeBtn.disabled = false;
-  analyzeBtn.innerHTML = `
-    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-    </svg>
-    Analyze Resume
-  `;
+  if (resultsSection) resultsSection.classList.remove("hidden");
+  if (analyzeBtn) {
+    analyzeBtn.disabled = false;
+    analyzeBtn.innerHTML = `
+      <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+      Analyze Resume
+    `;
+  }
 
   // Update scores and progress bars with smooth animations
   setTimeout(() => {
-    updateScore(overallScore, overallProgress, data.overall_score || 0);
+    if (overallScore && overallProgress) {
+      updateScore(overallScore, overallProgress, data.overall_score || 0);
+    }
   }, 300);
 
   if (data.sections) {
     setTimeout(() => {
-      updateScore(
-        clarityScore,
-        clarityProgress,
-        data.sections.clarity?.score || 0
-      );
-      clarityFeedback.textContent =
-        data.sections.clarity?.feedback || "No feedback available";
+      if (clarityScore && clarityProgress) {
+        updateScore(
+          clarityScore,
+          clarityProgress,
+          data.sections.clarity?.score || 0
+        );
+      }
+      if (clarityFeedback) {
+        clarityFeedback.textContent =
+          data.sections.clarity?.feedback || "No feedback available";
+      }
 
-      updateScore(
-        impactScore,
-        impactProgress,
-        data.sections.impact?.score || 0
-      );
-      impactFeedback.textContent =
-        data.sections.impact?.feedback || "No feedback available";
+      if (impactScore && impactProgress) {
+        updateScore(
+          impactScore,
+          impactProgress,
+          data.sections.impact?.score || 0
+        );
+      }
+      if (impactFeedback) {
+        impactFeedback.textContent =
+          data.sections.impact?.feedback || "No feedback available";
+      }
 
-      updateScore(
-        atsScore,
-        atsProgress,
-        data.sections.ats_optimization?.score || 0
-      );
-      atsFeedback.textContent =
-        data.sections.ats_optimization?.feedback || "No feedback available";
+      if (atsScore && atsProgress) {
+        updateScore(
+          atsScore,
+          atsProgress,
+          data.sections.ats_optimization?.score || 0
+        );
+      }
+      if (atsFeedback) {
+        atsFeedback.textContent =
+          data.sections.ats_optimization?.feedback || "No feedback available";
+      }
 
-      updateScore(
-        formattingScore,
-        formattingProgress,
-        data.sections.formatting?.score || 0
-      );
-      formattingFeedback.textContent =
-        data.sections.formatting?.feedback || "No feedback available";
+      if (formattingScore && formattingProgress) {
+        updateScore(
+          formattingScore,
+          formattingProgress,
+          data.sections.formatting?.score || 0
+        );
+      }
+      if (formattingFeedback) {
+        formattingFeedback.textContent =
+          data.sections.formatting?.feedback || "No feedback available";
+      }
     }, 600);
   }
 
@@ -565,36 +590,45 @@ function showResults(data) {
   // Show JD matching results if available
   if (data.jd_match) {
     setTimeout(() => {
-      jdMatchSection.classList.remove("hidden");
-      updateScore(
-        jdMatchScore,
-        jdMatchProgress,
-        data.jd_match.score || 0,
-        "/100"
-      );
-      jdMatchFeedback.textContent =
-        data.jd_match.feedback || "No JD feedback available";
+      if (jdMatchSection) jdMatchSection.classList.remove("hidden");
+      if (jdMatchScore && jdMatchProgress) {
+        updateScore(
+          jdMatchScore,
+          jdMatchProgress,
+          data.jd_match.score || 0,
+          "/100"
+        );
+      }
+      if (jdMatchFeedback) {
+        jdMatchFeedback.textContent =
+          data.jd_match.feedback || "No JD feedback available";
+      }
 
       if (data.jd_recommendations && data.jd_recommendations.length > 0) {
-        jdRecommendationsSection.classList.remove("hidden");
-        updateList(jdRecommendationsList, data.jd_recommendations);
+        if (jdRecommendationsSection)
+          jdRecommendationsSection.classList.remove("hidden");
+        if (jdRecommendationsList)
+          updateList(jdRecommendationsList, data.jd_recommendations);
       }
     }, 1200);
   }
 
   // Update lists with final animation
   setTimeout(() => {
-    updateList(strengthsList, data.strengths || []);
-    updateList(suggestionsList, data.top_suggestions || []);
+    if (strengthsList) updateList(strengthsList, data.strengths || []);
+    if (suggestionsList)
+      updateList(suggestionsList, data.top_suggestions || []);
   }, 1500);
 }
 
 // Update score and progress bar
 function updateScore(scoreElement, progressElement, score, suffix = "/100") {
-  scoreElement.textContent = `${score}${suffix}`;
-  setTimeout(() => {
-    progressElement.style.width = `${score}%`;
-  }, 100);
+  if (scoreElement) scoreElement.textContent = `${score}${suffix}`;
+  if (progressElement) {
+    setTimeout(() => {
+      progressElement.style.width = `${score}%`;
+    }, 100);
+  }
 }
 
 // Update lists
@@ -619,46 +653,61 @@ function updateAdvancedAnalysis(advancedData) {
   // Tone Evaluation
   if (advancedData.tone_evaluation) {
     const tone = advancedData.tone_evaluation;
-    updateScore(toneScore, toneProgress, tone.score || 0, "/100");
-    toneType.textContent = `Tone: ${tone.tone_type || "Unknown"}`;
-    toneFeedback.textContent = tone.feedback || "No tone feedback available";
+    if (toneScore && toneProgress) {
+      updateScore(toneScore, toneProgress, tone.score || 0, "/100");
+    }
+    if (toneType) toneType.textContent = `Tone: ${tone.tone_type || "Unknown"}`;
+    if (toneFeedback)
+      toneFeedback.textContent = tone.feedback || "No tone feedback available";
   }
 
   // Bullet Point Grade
   if (advancedData.bullet_point_grade) {
     const bullet = advancedData.bullet_point_grade;
-    updateScore(bulletScore, bulletProgress, bullet.score || 0, "/100");
-    actionVerbs.textContent = bullet.action_verbs_count || 0;
-    quantifiedBullets.textContent = `${bullet.quantified_bullets || 0}/${
-      bullet.total_bullets || 0
-    }`;
-    bulletFeedback.textContent =
-      bullet.feedback || "No bullet point feedback available";
+    if (bulletScore && bulletProgress) {
+      updateScore(bulletScore, bulletProgress, bullet.score || 0, "/100");
+    }
+    if (actionVerbs) actionVerbs.textContent = bullet.action_verbs_count || 0;
+    if (quantifiedBullets) {
+      quantifiedBullets.textContent = `${bullet.quantified_bullets || 0}/${
+        bullet.total_bullets || 0
+      }`;
+    }
+    if (bulletFeedback) {
+      bulletFeedback.textContent =
+        bullet.feedback || "No bullet point feedback available";
+    }
   }
 
   // Buzzword Detection
   if (advancedData.buzzword_detection) {
     const buzzword = advancedData.buzzword_detection;
-    updateScore(buzzwordScore, buzzwordProgress, buzzword.score || 0, "/100");
-    buzzwordCount.textContent = buzzword.buzzword_count || 0;
+    if (buzzwordScore && buzzwordProgress) {
+      updateScore(buzzwordScore, buzzwordProgress, buzzword.score || 0, "/100");
+    }
+    if (buzzwordCount) buzzwordCount.textContent = buzzword.buzzword_count || 0;
     formatBuzzwordList(buzzword.buzzwords_found || []);
   }
 
   // Red Flags
   if (advancedData.red_flags) {
     const redFlag = advancedData.red_flags;
-    updateScore(redFlagScore, redFlagProgress, redFlag.score || 0, "/100");
-    redFlagCount.textContent = redFlag.flag_count || 0;
+    if (redFlagScore && redFlagProgress) {
+      updateScore(redFlagScore, redFlagProgress, redFlag.score || 0, "/100");
+    }
+    if (redFlagCount) redFlagCount.textContent = redFlag.flag_count || 0;
     formatRedFlagList(redFlag.flags_detected || []);
   }
 
   // Skills Balance
   if (advancedData.skills_balance) {
     const skills = advancedData.skills_balance;
-    updateScore(skillsScore, skillsProgress, skills.score || 0, "/100");
-    hardSkills.textContent = skills.hard_skills_count || 0;
-    softSkills.textContent = skills.soft_skills_count || 0;
-    skillsRatio.textContent = skills.balance_ratio || "--";
+    if (skillsScore && skillsProgress) {
+      updateScore(skillsScore, skillsProgress, skills.score || 0, "/100");
+    }
+    if (hardSkills) hardSkills.textContent = skills.hard_skills_count || 0;
+    if (softSkills) softSkills.textContent = skills.soft_skills_count || 0;
+    if (skillsRatio) skillsRatio.textContent = skills.balance_ratio || "--";
   }
 
   // Generate advanced insights
@@ -667,6 +716,8 @@ function updateAdvancedAnalysis(advancedData) {
 
 // Format buzzword list
 function formatBuzzwordList(buzzwords) {
+  if (!buzzwordList) return;
+
   if (buzzwords.length === 0) {
     buzzwordList.innerHTML =
       '<p class="text-green-600">✓ No problematic buzzwords found</p>';
@@ -688,6 +739,8 @@ function formatBuzzwordList(buzzwords) {
 
 // Format red flag list
 function formatRedFlagList(flags) {
+  if (!redFlagList) return;
+
   if (flags.length === 0) {
     redFlagList.innerHTML =
       '<p class="text-green-600">✓ No red flags detected</p>';
@@ -757,9 +810,11 @@ function generateAdvancedInsights(advancedData) {
     insights.push("• Focus on top suggestions for improvement");
   }
 
-  advancedInsights.innerHTML = insights
-    .map((insight) => `<p>${insight}</p>`)
-    .join("");
+  if (advancedInsights) {
+    advancedInsights.innerHTML = insights
+      .map((insight) => `<p>${insight}</p>`)
+      .join("");
+  }
 }
 
 // Main analyze function
