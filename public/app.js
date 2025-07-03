@@ -121,6 +121,8 @@ function toggleTheme() {
 // Pro Tip Toast Functionality
 function showProTip() {
   if (!localStorage.getItem("proTipDismissed")) {
+    // Reset display style in case it was hidden
+    proTipToast.style.display = "block";
     setTimeout(() => {
       proTipToast.classList.remove("translate-x-full");
       proTipToast.classList.add("translate-x-0");
@@ -134,7 +136,15 @@ function hideProTip() {
 }
 
 function dismissProTipPermanently() {
-  hideProTip();
+  // Slide out immediately
+  proTipToast.classList.remove("translate-x-0");
+  proTipToast.classList.add("translate-x-full");
+
+  // After animation completes, ensure it's completely hidden
+  setTimeout(() => {
+    proTipToast.style.display = "none";
+  }, 500);
+
   localStorage.setItem("proTipDismissed", "true");
 }
 
@@ -168,6 +178,8 @@ jobDescription.addEventListener("input", function () {
 // Show pro tip when job description is focused (if not permanently dismissed)
 jobDescription.addEventListener("focus", function () {
   if (!localStorage.getItem("proTipDismissed")) {
+    // Reset display style in case it was hidden
+    proTipToast.style.display = "block";
     setTimeout(() => {
       proTipToast.classList.remove("translate-x-full");
       proTipToast.classList.add("translate-x-0");
