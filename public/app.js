@@ -317,17 +317,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Enhanced smooth scroll for results
+  // Smooth scroll to results function
   function smoothScrollToResults() {
-    const element = document.getElementById("resultsSection");
-    if (element && !element.classList.contains("hidden")) {
-      setTimeout(() => {
-        element.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-          inline: "nearest",
-        });
-      }, 1600);
+    const resultsSection = document.getElementById("resultsSection");
+    if (resultsSection) {
+      resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }
 
