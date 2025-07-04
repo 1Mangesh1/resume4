@@ -555,139 +555,64 @@ function showError(message) {
 // Show results
 function showResults(data) {
   hideAllStates();
-  if (resultsSection) resultsSection.classList.remove("hidden");
-  if (analyzeBtn) {
-    analyzeBtn.disabled = false;
-    analyzeBtn.innerHTML = `
-      <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-      </svg>
-      Analyze Resume
-    `;
+  resultsSection.classList.remove("hidden");
+
+  // Show the generators section
+  const generatorsSection = document.getElementById("generatorsSection");
+  if (generatorsSection) {
+    generatorsSection.classList.remove("hidden");
   }
 
-  // Update scores and progress bars with smooth animations
-  setTimeout(() => {
-    if (overallScore && overallProgress) {
-      updateScore(overallScore, overallProgress, data.overall_score || 0);
-    }
-  }, 300);
+  // Update scores and progress bars
+  updateScore(overallScore, overallProgress, data.overall_score);
+  updateScore(clarityScore, clarityProgress, data.sections?.clarity?.score);
+  updateScore(impactScore, impactProgress, data.sections?.impact?.score);
+  updateScore(atsScore, atsProgress, data.sections?.ats_optimization?.score);
+  updateScore(
+    formattingScore,
+    formattingProgress,
+    data.sections?.formatting?.score
+  );
 
-  if (data.sections) {
-    setTimeout(() => {
-      if (clarityScore && clarityProgress) {
-        updateScore(
-          clarityScore,
-          clarityProgress,
-          data.sections.clarity?.score || 0
-        );
-      }
-      if (clarityFeedback) {
-        clarityFeedback.textContent =
-          data.sections.clarity?.feedback || "No feedback available";
-      }
+  // Update feedback sections
+  if (clarityFeedback)
+    clarityFeedback.textContent = data.sections?.clarity?.feedback || "";
+  if (impactFeedback)
+    impactFeedback.textContent = data.sections?.impact?.feedback || "";
+  if (atsFeedback)
+    atsFeedback.textContent = data.sections?.ats_optimization?.feedback || "";
+  if (formattingFeedback)
+    formattingFeedback.textContent = data.sections?.formatting?.feedback || "";
 
-      if (impactScore && impactProgress) {
-        updateScore(
-          impactScore,
-          impactProgress,
-          data.sections.impact?.score || 0
-        );
-      }
-      if (impactFeedback) {
-        impactFeedback.textContent =
-          data.sections.impact?.feedback || "No feedback available";
-      }
-
-      if (atsScore && atsProgress) {
-        updateScore(
-          atsScore,
-          atsProgress,
-          data.sections.ats_optimization?.score || 0
-        );
-      }
-      if (atsFeedback) {
-        atsFeedback.textContent =
-          data.sections.ats_optimization?.feedback || "No feedback available";
-      }
-
-      if (formattingScore && formattingProgress) {
-        updateScore(
-          formattingScore,
-          formattingProgress,
-          data.sections.formatting?.score || 0
-        );
-      }
-      if (formattingFeedback) {
-        formattingFeedback.textContent =
-          data.sections.formatting?.feedback || "No feedback available";
-      }
-    }, 600);
-  }
-
-  // Update Advanced Analysis with staggered animations
-  if (data.advanced_analysis) {
-    setTimeout(() => {
-      updateAdvancedAnalysis(data.advanced_analysis);
-    }, 900);
-  }
-
-  // Show JD matching results if available
+  // Update JD match section if available
   if (data.jd_match) {
-    setTimeout(() => {
-      if (jdMatchSection) jdMatchSection.classList.remove("hidden");
-      if (jdMatchScore && jdMatchProgress) {
-        updateScore(
-          jdMatchScore,
-          jdMatchProgress,
-          data.jd_match.score || 0,
-          "/100"
-        );
-      }
-      if (jdMatchFeedback) {
-        jdMatchFeedback.textContent =
-          data.jd_match.feedback || "No JD feedback available";
-      }
-
-      if (data.jd_recommendations && data.jd_recommendations.length > 0) {
-        if (jdRecommendationsSection)
-          jdRecommendationsSection.classList.remove("hidden");
-        if (jdRecommendationsList)
-          updateList(jdRecommendationsList, data.jd_recommendations);
-      }
-    }, 1200);
+    jdMatchSection?.classList.remove("hidden");
+    updateScore(jdMatchScore, jdMatchProgress, data.jd_match.score);
+    if (jdMatchFeedback)
+      jdMatchFeedback.textContent = data.jd_match.feedback || "";
+  } else {
+    jdMatchSection?.classList.add("hidden");
   }
 
-  // Update lists with final animation
-  setTimeout(() => {
-    if (strengthsList) updateList(strengthsList, data.strengths || []);
-    if (suggestionsList)
-      updateList(suggestionsList, data.top_suggestions || []);
-  }, 1500);
-
-  // Show generator outputs if present
-  if (resultsSection) {
-    // Remove previous generator outputs
-    const prevGen = document.getElementById("generatorOutputs");
-    if (prevGen) prevGen.remove();
-    // Create new generator outputs container
-    const genDiv = document.createElement("div");
-    genDiv.id = "generatorOutputs";
-    genDiv.className = "space-y-8 mt-8";
-    if (data.resume_summary) {
-      genDiv.innerHTML += `<div class='glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft'><h3 class='text-2xl font-bold mb-3 text-gray-900 dark:text-white'>Resume Summary</h3><p class='text-gray-700 dark:text-dark-200 text-lg whitespace-pre-line'>${data.resume_summary}</p></div>`;
-    }
-    if (data.tailored_resume) {
-      genDiv.innerHTML += `<div class='glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft'><h3 class='text-2xl font-bold mb-3 text-gray-900 dark:text-white'>Tailored Resume Variant</h3><p class='text-gray-700 dark:text-dark-200 text-lg whitespace-pre-line'>${data.tailored_resume}</p></div>`;
-    }
-    if (data.cover_letter) {
-      genDiv.innerHTML += `<div class='glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft'><h3 class='text-2xl font-bold mb-3 text-gray-900 dark:text-white'>Cover Letter</h3><p class='text-gray-700 dark:text-dark-200 text-lg whitespace-pre-line'>${data.cover_letter}</p></div>`;
-    }
-    if (data.linkedin_summary) {
-      genDiv.innerHTML += `<div class='glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft'><h3 class='text-2xl font-bold mb-3 text-gray-900 dark:text-white'>LinkedIn Summary</h3><p class='text-gray-700 dark:text-dark-200 text-lg whitespace-pre-line'>${data.linkedin_summary}</p></div>`;
-    }
-    if (genDiv.innerHTML) resultsSection.appendChild(genDiv);
+  // Update JD recommendations if available
+  if (data.jd_recommendations && data.jd_recommendations.length > 0) {
+    jdRecommendationsSection?.classList.remove("hidden");
+    updateList(jdRecommendationsList, data.jd_recommendations);
+  } else {
+    jdRecommendationsSection?.classList.add("hidden");
   }
+
+  // Update strengths and suggestions
+  updateList(strengthsList, data.strengths);
+  updateList(suggestionsList, data.top_suggestions);
+
+  // Update advanced analysis if available
+  if (data.advanced_analysis) {
+    updateAdvancedAnalysis(data.advanced_analysis);
+  }
+
+  // Smooth scroll to results
+  smoothScrollToResults();
 }
 
 // Update score and progress bar
@@ -950,12 +875,6 @@ async function analyzeResume() {
       (includeJDMatch?.checked || false) && jdText.length > 0
     );
 
-    // Add generator options
-    formData.append("includeSummaryGen", includeSummaryGen?.checked || false);
-    formData.append("includeVariantGen", includeVariantGen?.checked || false);
-    formData.append("includeCoverGen", includeCoverGen?.checked || false);
-    formData.append("includeLinkedInGen", includeLinkedInGen?.checked || false);
-
     const response = await fetch("/api/analyze", {
       method: "POST",
       body: formData,
@@ -981,7 +900,21 @@ async function analyzeResume() {
       });
     }
 
+    // Show results and generators section
     showResults(data);
+
+    // Show generators section
+    const generatorsSection = document.getElementById("generatorsSection");
+    if (generatorsSection) {
+      generatorsSection.classList.remove("hidden");
+      // Smooth scroll to include generators section
+      setTimeout(() => {
+        generatorsSection.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
+      }, 500);
+    }
   } catch (error) {
     console.error("Analysis error:", error);
 
