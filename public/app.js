@@ -110,6 +110,14 @@ if (typeof window !== "undefined" && window.va) {
   window.va("pageview");
 }
 
+// Smooth scroll to results function
+function smoothScrollToResults() {
+  const resultsSection = document.getElementById("resultsSection");
+  if (resultsSection) {
+    resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
 // Wait for DOM to be ready before attaching event listeners
 document.addEventListener("DOMContentLoaded", function () {
   // Initialize all DOM elements
@@ -316,14 +324,6 @@ document.addEventListener("DOMContentLoaded", function () {
       textarea.classList.add("has-content");
     }
   });
-
-  // Smooth scroll to results function
-  function smoothScrollToResults() {
-    const resultsSection = document.getElementById("resultsSection");
-    if (resultsSection) {
-      resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }
 
   // Override showResults to include smooth scroll
   const originalShowResults = showResults;
