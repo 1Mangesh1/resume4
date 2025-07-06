@@ -18,6 +18,13 @@ A powerful, AI-driven web application that analyzes resumes using Google's Gemin
 - **Configurable Options** - Keyword optimization, ATS compatibility focus
 - **Instant Results** - Get comprehensive feedback in seconds
 
+### 🤖 **Optional AI Generators**
+
+- **📝 Resume Summary Generator** - Auto-generate professional summaries with keyword optimization
+- **🎯 Tailored Resume Generator** - Create job-specific resume variants with ATS optimization
+- **💌 Cover Letter Generator** - Generate personalized cover letters with strategic positioning
+- **🔗 LinkedIn Summary Optimizer** - Optimize LinkedIn "About" sections with keyword density analysis
+
 ### 💼 **Job-Specific Features**
 
 - **JD Match Score** - See how well your resume fits the role (0-100)
@@ -37,7 +44,7 @@ A powerful, AI-driven web application that analyzes resumes using Google's Gemin
 ### Prerequisites
 
 - **Node.js** (v16 or higher)
-- **Google Gemini API key** (configured in `.env`)
+- **Google Gemini API key** (free from Google AI Studio)
 
 ### Installation
 
@@ -48,10 +55,14 @@ A powerful, AI-driven web application that analyzes resumes using Google's Gemin
    npm install
    ```
 
-3. **API key is already configured** in `.env` file:
+3. **Set up Gemini API key**:
 
-   ```
-   GEMINI_API_KEY="your-api-key-here"
+   - Get your free API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
+   - Create a `.env` file in the project root:
+
+   ```bash
+   GEMINI_API_KEY=your_actual_api_key_here
+   PORT=3000
    ```
 
 4. **Start the server**:
@@ -64,6 +75,18 @@ A powerful, AI-driven web application that analyzes resumes using Google's Gemin
    ```
    http://localhost:3000
    ```
+
+### 🔑 Gemini API Setup
+
+The application uses Google's Gemini 1.5 Flash model for AI analysis. Here's how to set it up:
+
+1. **Visit [Google AI Studio](https://aistudio.google.com/app/apikey)**
+2. **Sign in** with your Google account
+3. **Create API Key** - Click "Create API Key" button
+4. **Copy the key** and add it to your `.env` file
+5. **Restart the server** to apply the changes
+
+**Note**: The Gemini API has a generous free tier that's perfect for resume analysis. If the API is not configured, the application will fall back to mock responses.
 
 ## 📋 How to Use
 

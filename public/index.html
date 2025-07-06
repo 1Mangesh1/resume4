@@ -860,7 +860,7 @@
           <!-- Optional Generators Section -->
           <div
             id="generatorsSection"
-            class="glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft hidden"
+            class="glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft"
           >
             <h2
               class="text-2xl font-bold mb-6 text-gray-900 dark:text-white flex items-center"
@@ -881,10 +881,14 @@
               Optional Generators
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button
-                id="summaryGenBtn"
-                class="p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 text-left group"
+              <label
+                class="flex items-start space-x-3 p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 cursor-pointer group"
               >
+                <input
+                  type="checkbox"
+                  id="includeSummaryGen"
+                  class="form-checkbox h-5 w-5 text-primary-600 rounded border-dark-300 dark:border-dark-600 focus:ring-primary-500 mt-1"
+                />
                 <div class="flex items-start space-x-3">
                   <div class="flex-shrink-0">
                     <svg
@@ -912,12 +916,16 @@
                     </p>
                   </div>
                 </div>
-              </button>
+              </label>
 
-              <button
-                id="variantGenBtn"
-                class="p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 text-left group"
+              <label
+                class="flex items-start space-x-3 p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 cursor-pointer group"
               >
+                <input
+                  type="checkbox"
+                  id="includeVariantGen"
+                  class="form-checkbox h-5 w-5 text-primary-600 rounded border-dark-300 dark:border-dark-600 focus:ring-primary-500 mt-1"
+                />
                 <div class="flex items-start space-x-3">
                   <div class="flex-shrink-0">
                     <svg
@@ -946,12 +954,16 @@
                     </p>
                   </div>
                 </div>
-              </button>
+              </label>
 
-              <button
-                id="coverGenBtn"
-                class="p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 text-left group"
+              <label
+                class="flex items-start space-x-3 p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 cursor-pointer group"
               >
+                <input
+                  type="checkbox"
+                  id="includeCoverGen"
+                  class="form-checkbox h-5 w-5 text-primary-600 rounded border-dark-300 dark:border-dark-600 focus:ring-primary-500 mt-1"
+                />
                 <div class="flex items-start space-x-3">
                   <div class="flex-shrink-0">
                     <svg
@@ -979,12 +991,16 @@
                     </p>
                   </div>
                 </div>
-              </button>
+              </label>
 
-              <button
-                id="linkedinGenBtn"
-                class="p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 text-left group"
+              <label
+                class="flex items-start space-x-3 p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 cursor-pointer group"
               >
+                <input
+                  type="checkbox"
+                  id="includeLinkedInGen"
+                  class="form-checkbox h-5 w-5 text-primary-600 rounded border-dark-300 dark:border-dark-600 focus:ring-primary-500 mt-1"
+                />
                 <div class="flex items-start space-x-3">
                   <div class="flex-shrink-0">
                     <svg
@@ -1012,7 +1028,7 @@
                     </p>
                   </div>
                 </div>
-              </button>
+              </label>
             </div>
           </div>
 

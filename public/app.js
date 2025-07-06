@@ -8,6 +8,9 @@ let fileDropZone, fileInfo, fileName, fileSize;
 let includeClarity, includeImpact, includeATS, includeJDMatch;
 let jobDescriptionSection, inputGrid;
 
+// Generator elements
+let includeSummaryGen, includeVariantGen, includeCoverGen, includeLinkedInGen;
+
 // Result elements - will be initialized after DOM loads
 let overallScore,
   overallProgress,
@@ -36,9 +39,6 @@ let themeToggle, proTipToast, dismissProTip;
 // Global variables
 let currentInputMethod = "file";
 let selectedFile = null;
-
-// Add at the top with other DOM elements
-let includeSummaryGen, includeVariantGen, includeCoverGen, includeLinkedInGen;
 
 // Dark Mode Functionality
 function initializeTheme() {
@@ -147,6 +147,12 @@ document.addEventListener("DOMContentLoaded", function () {
   includeATS = document.getElementById("includeATS");
   includeJDMatch = document.getElementById("includeJDMatch");
 
+  // Generator option checkboxes
+  includeSummaryGen = document.getElementById("includeSummaryGen");
+  includeVariantGen = document.getElementById("includeVariantGen");
+  includeCoverGen = document.getElementById("includeCoverGen");
+  includeLinkedInGen = document.getElementById("includeLinkedInGen");
+
   // Job Description Section elements
   jobDescriptionSection = document.getElementById("jobDescriptionSection");
   inputGrid = document.getElementById("inputGrid");
@@ -208,12 +214,6 @@ document.addEventListener("DOMContentLoaded", function () {
   themeToggle = document.getElementById("themeToggle");
   proTipToast = document.getElementById("proTipToast");
   dismissProTip = document.getElementById("dismissProTip");
-
-  // Add generator options
-  includeSummaryGen = document.getElementById("includeSummaryGen");
-  includeVariantGen = document.getElementById("includeVariantGen");
-  includeCoverGen = document.getElementById("includeCoverGen");
-  includeLinkedInGen = document.getElementById("includeLinkedInGen");
 
   // Event Listeners - Ensure DOM elements exist first
   if (analyzeBtn) {
@@ -371,32 +371,42 @@ function toggleJobDescriptionSection() {
 
   if (isChecked) {
     // Show job description section
-    jobDescriptionSection.classList.remove("hidden");
-    // Use setTimeout to ensure the element is rendered before animating
-    setTimeout(() => {
-      jobDescriptionSection.classList.remove("opacity-0", "translate-y-4");
-      jobDescriptionSection.classList.add("opacity-100", "translate-y-0");
-    }, 10);
+    if (jobDescriptionSection) {
+      jobDescriptionSection.classList.remove("hidden");
+      // Use setTimeout to ensure the element is rendered before animating
+      setTimeout(() => {
+        jobDescriptionSection.classList.remove("opacity-0", "translate-y-4");
+        jobDescriptionSection.classList.add("opacity-100", "translate-y-0");
+      }, 10);
+    }
 
     // Change grid to 2 columns
-    inputGrid.classList.remove("lg:grid-cols-1");
-    inputGrid.classList.add("lg:grid-cols-2");
+    if (inputGrid) {
+      inputGrid.classList.remove("lg:grid-cols-1");
+      inputGrid.classList.add("lg:grid-cols-2");
+    }
   } else {
     // Hide job description section
-    jobDescriptionSection.classList.remove("opacity-100", "translate-y-0");
-    jobDescriptionSection.classList.add("opacity-0", "translate-y-4");
+    if (jobDescriptionSection) {
+      jobDescriptionSection.classList.remove("opacity-100", "translate-y-0");
+      jobDescriptionSection.classList.add("opacity-0", "translate-y-4");
 
-    // Hide after animation completes
-    setTimeout(() => {
-      jobDescriptionSection.classList.add("hidden");
-    }, 500);
+      // Hide after animation completes
+      setTimeout(() => {
+        jobDescriptionSection.classList.add("hidden");
+      }, 500);
+    }
 
     // Change grid to 1 column
-    inputGrid.classList.remove("lg:grid-cols-2");
-    inputGrid.classList.add("lg:grid-cols-1");
+    if (inputGrid) {
+      inputGrid.classList.remove("lg:grid-cols-2");
+      inputGrid.classList.add("lg:grid-cols-1");
+    }
 
     // Clear job description content when hidden
-    jobDescription.value = "";
+    if (jobDescription) {
+      jobDescription.value = "";
+    }
   }
 }
 
@@ -513,12 +523,16 @@ function hideAllStates() {
   if (jdMatchSection) jdMatchSection.classList.add("hidden");
   if (jdRecommendationsSection)
     jdRecommendationsSection.classList.add("hidden");
+
+  // Don't hide generators section - it should always be visible
 }
 
 // Show loading state
 function showLoading() {
   hideAllStates();
   if (loadingState) loadingState.classList.remove("hidden");
+
+  // Disable analyze button and show loading state
   if (analyzeBtn) {
     analyzeBtn.disabled = true;
     analyzeBtn.innerHTML = `
@@ -533,8 +547,10 @@ function showLoading() {
 // Show error state
 function showError(message) {
   hideAllStates();
-  if (errorMessage) errorMessage.textContent = message;
   if (errorState) errorState.classList.remove("hidden");
+  if (errorMessage) errorMessage.textContent = message;
+
+  // Re-enable analyze button
   if (analyzeBtn) {
     analyzeBtn.disabled = false;
     analyzeBtn.innerHTML = `
@@ -546,15 +562,19 @@ function showError(message) {
   }
 }
 
-// Show results
 function showResults(data) {
   hideAllStates();
   resultsSection.classList.remove("hidden");
 
-  // Show the generators section
-  const generatorsSection = document.getElementById("generatorsSection");
-  if (generatorsSection) {
-    generatorsSection.classList.remove("hidden");
+  // Re-enable analyze button
+  if (analyzeBtn) {
+    analyzeBtn.disabled = false;
+    analyzeBtn.innerHTML = `
+      <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+      Analyze Resume
+    `;
   }
 
   // Update scores and progress bars
@@ -604,6 +624,9 @@ function showResults(data) {
   if (data.advanced_analysis) {
     updateAdvancedAnalysis(data.advanced_analysis);
   }
+
+  // Display generated content
+  displayGeneratedContent(data);
 
   // Smooth scroll to results
   smoothScrollToResults();
@@ -805,6 +828,634 @@ function generateAdvancedInsights(advancedData) {
   }
 }
 
+// Function to display generated content
+function displayGeneratedContent(data) {
+  // Remove any existing generated content
+  const existingContent = document.getElementById("generatedContent");
+  if (existingContent) {
+    existingContent.remove();
+  }
+
+  // Create container for generated content
+  const contentContainer = document.createElement("div");
+  contentContainer.id = "generatedContent";
+  contentContainer.className = "mt-8 space-y-6";
+
+  let hasGeneratedContent = false;
+
+  // Resume Summary
+  if (data.resume_summary) {
+    hasGeneratedContent = true;
+    const summaryDiv = document.createElement("div");
+    summaryDiv.className =
+      "glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft";
+
+    const summaryData =
+      typeof data.resume_summary === "string"
+        ? { summary: data.resume_summary }
+        : data.resume_summary;
+
+    summaryDiv.innerHTML = `
+      <div class="flex items-center mb-4">
+        <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Generated Resume Summary</h3>
+      </div>
+      <div class="p-6 bg-primary-50 dark:bg-dark-800 rounded-lg">
+        <div class="mb-4">
+          <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Professional Summary</h4>
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed">${
+            summaryData.summary
+          }</p>
+        </div>
+        ${
+          summaryData.explanation
+            ? `
+          <div class="mb-4">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Strategy</h4>
+            <p class="text-gray-600 dark:text-gray-400 text-sm">${summaryData.explanation}</p>
+          </div>
+        `
+            : ""
+        }
+        ${
+          summaryData.keywords
+            ? `
+          <div class="mb-4">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Keywords Included</h4>
+            <div class="flex flex-wrap gap-2">
+              ${summaryData.keywords
+                .map(
+                  (keyword) =>
+                    `<span class="px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-full text-xs">${keyword}</span>`
+                )
+                .join("")}
+            </div>
+          </div>
+        `
+            : ""
+        }
+        ${
+          summaryData.metrics_highlighted
+            ? `
+          <div class="mb-4">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Metrics Highlighted</h4>
+            <ul class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
+              ${summaryData.metrics_highlighted
+                .map((metric) => `<li>• ${metric}</li>`)
+                .join("")}
+            </ul>
+          </div>
+        `
+            : ""
+        }
+        ${
+          summaryData.improvement_tips
+            ? `
+          <div class="mb-4">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Improvement Tips</h4>
+            <ul class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
+              ${summaryData.improvement_tips
+                .map((tip) => `<li>• ${tip}</li>`)
+                .join("")}
+            </ul>
+          </div>
+        `
+            : ""
+        }
+      </div>
+      <button onclick="copyToClipboard('${summaryData.summary.replace(
+        /'/g,
+        "\\'"
+      )}', this)" class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+        Copy Summary
+      </button>
+    `;
+    contentContainer.appendChild(summaryDiv);
+  }
+
+  // Tailored Resume
+  if (data.tailored_resume) {
+    hasGeneratedContent = true;
+    const variantDiv = document.createElement("div");
+    variantDiv.className =
+      "glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft";
+
+    const variantData = data.tailored_resume;
+
+    variantDiv.innerHTML = `
+      <div class="flex items-center mb-4">
+        <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
+        </svg>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Tailored Resume Optimization</h3>
+      </div>
+      <div class="p-6 bg-primary-50 dark:bg-dark-800 rounded-lg">
+        ${
+          variantData.tailored_summary
+            ? `
+          <div class="mb-6">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Tailored Professional Summary</h4>
+            <div class="p-4 bg-white dark:bg-dark-700 rounded-lg border border-gray-200 dark:border-dark-600">
+              <p class="text-gray-700 dark:text-gray-300 leading-relaxed">${variantData.tailored_summary}</p>
+            </div>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          variantData.enhanced_bullets
+            ? `
+          <div class="mb-6">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Enhanced Bullet Points</h4>
+            <div class="space-y-4">
+              ${variantData.enhanced_bullets
+                .map(
+                  (bullet) => `
+                <div class="p-4 bg-white dark:bg-dark-700 rounded-lg border border-gray-200 dark:border-dark-600">
+                  <div class="mb-2">
+                    <span class="text-sm font-medium text-red-600 dark:text-red-400">Original:</span>
+                    <p class="text-gray-600 dark:text-gray-400 mt-1">${bullet.original}</p>
+                  </div>
+                  <div class="mb-2">
+                    <span class="text-sm font-medium text-green-600 dark:text-green-400">Enhanced:</span>
+                    <p class="text-gray-700 dark:text-gray-300 mt-1">${bullet.enhanced}</p>
+                  </div>
+                  <div>
+                    <span class="text-sm font-medium text-blue-600 dark:text-blue-400">Reasoning:</span>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">${bullet.reasoning}</p>
+                  </div>
+                </div>
+              `
+                )
+                .join("")}
+            </div>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          variantData.skills_optimization
+            ? `
+          <div class="mb-6">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Skills Optimization</h4>
+            <div class="space-y-3">
+              ${
+                variantData.skills_optimization.prioritized_skills
+                  ? `
+                <div>
+                  <h5 class="font-medium text-gray-800 dark:text-gray-200 mb-2">Prioritized Skills</h5>
+                  <div class="flex flex-wrap gap-2">
+                    ${variantData.skills_optimization.prioritized_skills
+                      .map(
+                        (skill) =>
+                          `<span class="px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-full text-xs">${skill}</span>`
+                      )
+                      .join("")}
+                  </div>
+                </div>
+              `
+                  : ""
+              }
+              ${
+                variantData.skills_optimization.skills_to_add
+                  ? `
+                <div>
+                  <h5 class="font-medium text-gray-800 dark:text-gray-200 mb-2">Skills to Add</h5>
+                  <div class="flex flex-wrap gap-2">
+                    ${variantData.skills_optimization.skills_to_add
+                      .map(
+                        (skill) =>
+                          `<span class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full text-xs">${skill}</span>`
+                      )
+                      .join("")}
+                  </div>
+                </div>
+              `
+                  : ""
+              }
+              ${
+                variantData.skills_optimization.skills_to_remove
+                  ? `
+                <div>
+                  <h5 class="font-medium text-gray-800 dark:text-gray-200 mb-2">Skills to De-emphasize</h5>
+                  <div class="flex flex-wrap gap-2">
+                    ${variantData.skills_optimization.skills_to_remove
+                      .map(
+                        (skill) =>
+                          `<span class="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-full text-xs">${skill}</span>`
+                      )
+                      .join("")}
+                  </div>
+                </div>
+              `
+                  : ""
+              }
+            </div>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          variantData.ats_keywords
+            ? `
+          <div class="mb-6">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-3">ATS Keywords</h4>
+            <div class="flex flex-wrap gap-2">
+              ${variantData.ats_keywords
+                .map(
+                  (keyword) =>
+                    `<span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-xs">${keyword}</span>`
+                )
+                .join("")}
+            </div>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          variantData.match_percentage
+            ? `
+          <div class="mb-6">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Job Match Analysis</h4>
+            <div class="p-4 bg-white dark:bg-dark-700 rounded-lg border border-gray-200 dark:border-dark-600">
+              <div class="flex items-center mb-2">
+                <span class="text-2xl font-bold text-primary-600 dark:text-primary-400">${variantData.match_percentage}%</span>
+                <span class="text-gray-600 dark:text-gray-400 ml-2">Job Match Score</span>
+              </div>
+              <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                <div class="bg-primary-600 h-2 rounded-full" style="width: ${variantData.match_percentage}%"></div>
+              </div>
+            </div>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          variantData.section_recommendations
+            ? `
+          <div class="mb-6">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Section Recommendations</h4>
+            <div class="space-y-3">
+              ${variantData.section_recommendations
+                .map(
+                  (rec) => `
+                <div class="p-3 bg-white dark:bg-dark-700 rounded-lg border border-gray-200 dark:border-dark-600">
+                  <div class="flex items-center mb-1">
+                    <span class="font-medium text-gray-800 dark:text-gray-200">${
+                      rec.section
+                    }</span>
+                    <span class="ml-2 px-2 py-1 text-xs rounded-full ${
+                      rec.priority === "high"
+                        ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+                        : rec.priority === "medium"
+                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
+                        : "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                    }">${rec.priority}</span>
+                  </div>
+                  <p class="text-gray-600 dark:text-gray-400 text-sm">${
+                    rec.recommendation
+                  }</p>
+                </div>
+              `
+                )
+                .join("")}
+            </div>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          variantData.improvement_areas
+            ? `
+          <div class="mb-4">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Areas for Improvement</h4>
+            <ul class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
+              ${variantData.improvement_areas
+                .map((area) => `<li>• ${area}</li>`)
+                .join("")}
+            </ul>
+          </div>
+        `
+            : ""
+        }
+      </div>
+      <button onclick="copyToClipboard('${JSON.stringify(
+        variantData,
+        null,
+        2
+      ).replace(
+        /'/g,
+        "\\'"
+      )}', this)" class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+        Copy Tailored Resume Data
+      </button>
+    `;
+    contentContainer.appendChild(variantDiv);
+  }
+
+  // Cover Letter
+  if (data.cover_letter) {
+    hasGeneratedContent = true;
+    const coverDiv = document.createElement("div");
+    coverDiv.className =
+      "glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft";
+
+    const coverData = data.cover_letter;
+    const fullLetter =
+      coverData.full_letter ||
+      `${coverData.greeting || ""}\n\n${coverData.introduction || ""}\n\n${
+        coverData.body_paragraph_1 || ""
+      }\n\n${coverData.body_paragraph_2 || ""}\n\n${
+        coverData.body_paragraph_3 || ""
+      }\n\n${coverData.closing || ""}\n\n${coverData.signature || ""}`;
+
+    coverDiv.innerHTML = `
+      <div class="flex items-center mb-4">
+        <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+        </svg>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Generated Cover Letter</h3>
+      </div>
+      <div class="p-6 bg-primary-50 dark:bg-dark-800 rounded-lg">
+        <div class="mb-6">
+          <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Complete Cover Letter</h4>
+          <div class="p-4 bg-white dark:bg-dark-700 rounded-lg border border-gray-200 dark:border-dark-600">
+            <pre class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap font-sans">${fullLetter}</pre>
+          </div>
+        </div>
+        
+        ${
+          coverData.key_strengths_highlighted
+            ? `
+          <div class="mb-4">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Key Strengths Highlighted</h4>
+            <ul class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
+              ${coverData.key_strengths_highlighted
+                .map((strength) => `<li>• ${strength}</li>`)
+                .join("")}
+            </ul>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          coverData.personalization_elements
+            ? `
+          <div class="mb-4">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Personalization Elements</h4>
+            <ul class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
+              ${coverData.personalization_elements
+                .map((element) => `<li>• ${element}</li>`)
+                .join("")}
+            </ul>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          coverData.word_count
+            ? `
+          <div class="mb-4">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Letter Analysis</h4>
+            <div class="text-gray-600 dark:text-gray-400 text-sm">
+              <p>Word Count: ${coverData.word_count}</p>
+              ${
+                coverData.tone_analysis
+                  ? `<p>Tone: ${coverData.tone_analysis}</p>`
+                  : ""
+              }
+            </div>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          coverData.improvement_suggestions
+            ? `
+          <div class="mb-4">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Improvement Suggestions</h4>
+            <ul class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
+              ${coverData.improvement_suggestions
+                .map((suggestion) => `<li>• ${suggestion}</li>`)
+                .join("")}
+            </ul>
+          </div>
+        `
+            : ""
+        }
+      </div>
+      <button onclick="copyToClipboard('${fullLetter.replace(
+        /'/g,
+        "\\'"
+      )}', this)" class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+        Copy Cover Letter
+      </button>
+    `;
+    contentContainer.appendChild(coverDiv);
+  }
+
+  // LinkedIn Summary
+  if (data.linkedin_summary) {
+    hasGeneratedContent = true;
+    const linkedinDiv = document.createElement("div");
+    linkedinDiv.className =
+      "glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft";
+
+    const linkedinData =
+      typeof data.linkedin_summary === "string"
+        ? { linkedin_summary: data.linkedin_summary }
+        : data.linkedin_summary;
+
+    linkedinDiv.innerHTML = `
+      <div class="flex items-center mb-4">
+        <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+        </svg>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">LinkedIn Summary Optimization</h3>
+      </div>
+      <div class="p-6 bg-primary-50 dark:bg-dark-800 rounded-lg">
+        <div class="mb-6">
+          <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Optimized LinkedIn About Section</h4>
+          <div class="p-4 bg-white dark:bg-dark-700 rounded-lg border border-gray-200 dark:border-dark-600">
+            <pre class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap font-sans">${
+              linkedinData.linkedin_summary
+            }</pre>
+          </div>
+        </div>
+        
+        ${
+          linkedinData.keyword_density
+            ? `
+          <div class="mb-4">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Keyword Optimization</h4>
+            <div class="space-y-3">
+              ${
+                linkedinData.keyword_density.primary_keywords
+                  ? `
+                <div>
+                  <h5 class="font-medium text-gray-800 dark:text-gray-200 mb-1">Primary Keywords</h5>
+                  <div class="flex flex-wrap gap-2">
+                    ${linkedinData.keyword_density.primary_keywords
+                      .map(
+                        (keyword) =>
+                          `<span class="px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-full text-xs">${keyword}</span>`
+                      )
+                      .join("")}
+                  </div>
+                </div>
+              `
+                  : ""
+              }
+              ${
+                linkedinData.keyword_density.secondary_keywords
+                  ? `
+                <div>
+                  <h5 class="font-medium text-gray-800 dark:text-gray-200 mb-1">Secondary Keywords</h5>
+                  <div class="flex flex-wrap gap-2">
+                    ${linkedinData.keyword_density.secondary_keywords
+                      .map(
+                        (keyword) =>
+                          `<span class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full text-xs">${keyword}</span>`
+                      )
+                      .join("")}
+                  </div>
+                </div>
+              `
+                  : ""
+              }
+              ${
+                linkedinData.keyword_density.industry_terms
+                  ? `
+                <div>
+                  <h5 class="font-medium text-gray-800 dark:text-gray-200 mb-1">Industry Terms</h5>
+                  <div class="flex flex-wrap gap-2">
+                    ${linkedinData.keyword_density.industry_terms
+                      .map(
+                        (term) =>
+                          `<span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-xs">${term}</span>`
+                      )
+                      .join("")}
+                  </div>
+                </div>
+              `
+                  : ""
+              }
+            </div>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          linkedinData.optimization_score
+            ? `
+          <div class="mb-4">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Optimization Analysis</h4>
+            <div class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
+              <p>Optimization Score: <span class="font-medium text-primary-600 dark:text-primary-400">${
+                linkedinData.optimization_score
+              }/100</span></p>
+              ${
+                linkedinData.character_count
+                  ? `<p>Character Count: ${linkedinData.character_count}</p>`
+                  : ""
+              }
+            </div>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          linkedinData.structure_analysis
+            ? `
+          <div class="mb-4">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Structure Analysis</h4>
+            <div class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
+              ${
+                linkedinData.structure_analysis.hook_strength
+                  ? `<p><strong>Hook:</strong> ${linkedinData.structure_analysis.hook_strength}</p>`
+                  : ""
+              }
+              ${
+                linkedinData.structure_analysis.story_flow
+                  ? `<p><strong>Flow:</strong> ${linkedinData.structure_analysis.story_flow}</p>`
+                  : ""
+              }
+              ${
+                linkedinData.structure_analysis.cta_effectiveness
+                  ? `<p><strong>Call-to-Action:</strong> ${linkedinData.structure_analysis.cta_effectiveness}</p>`
+                  : ""
+              }
+            </div>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          linkedinData.profile_completion_tips
+            ? `
+          <div class="mb-4">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Profile Completion Tips</h4>
+            <ul class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
+              ${linkedinData.profile_completion_tips
+                .map((tip) => `<li>• ${tip}</li>`)
+                .join("")}
+            </ul>
+          </div>
+        `
+            : ""
+        }
+      </div>
+      <button onclick="copyToClipboard('${linkedinData.linkedin_summary.replace(
+        /'/g,
+        "\\'"
+      )}', this)" class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+        Copy LinkedIn Summary
+      </button>
+    `;
+    contentContainer.appendChild(linkedinDiv);
+  }
+
+  // Add generated content to results section if any content was generated
+  if (hasGeneratedContent) {
+    resultsSection.appendChild(contentContainer);
+  }
+}
+
+// Helper function to copy text to clipboard
+function copyToClipboard(text, button) {
+  navigator.clipboard
+    .writeText(text)
+    .then(() => {
+      const originalText = button.textContent;
+      button.textContent = "Copied!";
+      button.classList.add("bg-green-600");
+      button.classList.remove("bg-primary-600");
+
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.classList.remove("bg-green-600");
+        button.classList.add("bg-primary-600");
+      }, 2000);
+    })
+    .catch((err) => {
+      console.error("Failed to copy text: ", err);
+    });
+}
+
 // Main analyze function
 async function analyzeResume() {
   let resumeContent = "";
@@ -869,6 +1520,12 @@ async function analyzeResume() {
       (includeJDMatch?.checked || false) && jdText.length > 0
     );
 
+    // Add generator options
+    formData.append("includeSummaryGen", includeSummaryGen?.checked || false);
+    formData.append("includeVariantGen", includeVariantGen?.checked || false);
+    formData.append("includeCoverGen", includeCoverGen?.checked || false);
+    formData.append("includeLinkedInGen", includeLinkedInGen?.checked || false);
+
     const response = await fetch("/api/analyze", {
       method: "POST",
       body: formData,
@@ -896,19 +1553,6 @@ async function analyzeResume() {
 
     // Show results and generators section
     showResults(data);
-
-    // Show generators section
-    const generatorsSection = document.getElementById("generatorsSection");
-    if (generatorsSection) {
-      generatorsSection.classList.remove("hidden");
-      // Smooth scroll to include generators section
-      setTimeout(() => {
-        generatorsSection.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-        });
-      }, 500);
-    }
   } catch (error) {
     console.error("Analysis error:", error);
 
