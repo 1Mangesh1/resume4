@@ -1,0 +1,169 @@
+% Standalone Modern Resume Template
+\documentclass[11pt,letterpaper]{article}
+
+% Required packages
+\usepackage[letterpaper,margin=0.75in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{latexsym}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\usepackage{fontawesome5}
+\usepackage{xcolor}
+
+% PDF settings
+\pdfgentounicode=1
+
+% Page layout
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+% URL styling
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Section formatting
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large\bfseries
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% Resume item commands
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=0.1in]}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+% Name and address commands
+\def\name#1{\def\@name{#1}}
+\def\@name{}
+
+\def\addressSep{$\diamond$}
+
+\let\@addressone\relax
+\let\@addresstwo\relax
+\let\@addressthree\relax
+
+\def\address#1{
+  \@ifundefined{@addressone}{
+    \def\@addressone{#1}
+  }{
+    \@ifundefined{@addresstwo}{
+      \def\@addresstwo{#1}
+    }{
+      \def\@addressthree{#1}
+    }
+  }
+}
+
+\def\printaddress#1{
+  \begingroup
+    \def\\{\addressSep\ }
+    \begin{center}#1\end{center}
+  \endgroup
+  \par
+  \addressskip
+}
+
+\def\printname{
+  \begingroup
+    \begin{center}
+      {\MakeUppercase{\namesize\bfseries \@name}}
+    \end{center}
+    \nameskip
+  \endgroup
+}
+
+% Redefine document environment to print header
+\let\ori@document=\document
+\renewcommand{\document}{
+  \ori@document
+  \printname
+  \@ifundefined{@addressone}{}{\printaddress{\@addressone}}
+  \@ifundefined{@addresstwo}{}{\printaddress{\@addresstwo}}
+  \@ifundefined{@addressthree}{}{\printaddress{\@addressthree}}
+}
+
+% Section environment
+\newenvironment{rSection}[1]{
+  \sectionskip
+  \MakeUppercase{\bfseries #1}
+  \sectionlineskip
+  \hrule
+  \begin{list}{}{
+    \setlength{\leftmargin}{1.5em}
+  }
+  \item[]
+}{
+  \end{list}
+}
+
+% Length definitions
+\def\namesize{\huge}
+\def\addressskip{\smallskip}
+\def\sectionlineskip{\medskip}
+\def\nameskip{\bigskip}
+\def\sectionskip{\medskip}
+
+% Document content starts here
+\name{{{FULL_NAME}}}
+\address{\faPhone{} \href{tel:{{PHONE}}}{{{PHONE}}} \\ \faEnvelope{} \href{mailto:{{EMAIL}}}{{{EMAIL}}} \\ \faLinkedin{} \href{{{LINKEDIN}}}{{{LINKEDIN_TEXT}}}}
+\address{\faGithub{} \href{{{GITHUB}}}{{{GITHUB_TEXT}}} \faGlobe{} \href{{{WEBSITE}}}{{{WEBSITE_TEXT}}}}
+
+\begin{document}
+
+\begin{rSection}{PROFESSIONAL SUMMARY}
+{{PROFESSIONAL_SUMMARY}}
+\end{rSection}
+
+\begin{rSection}{EDUCATION}
+{{EDUCATION_ITEMS}}
+\end{rSection}
+
+\begin{rSection}{TECHNICAL SKILLS}
+{{SKILLS_SECTION}}
+\end{rSection}
+
+\begin{rSection}{EXPERIENCE}
+{{EXPERIENCE_ITEMS}}
+\end{rSection}
+
+\begin{rSection}{PROJECTS}
+{{PROJECT_ITEMS}}
+\end{rSection}
+
+{{ADDITIONAL_SECTIONS}}
+
+\end{document}
