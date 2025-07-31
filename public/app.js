@@ -1742,14 +1742,25 @@ async function analyzeResume() {
       body: formData,
     });
 
+    // Check if response is JSON
+    const contentType = response.headers.get("content-type") || "";
+    let data;
+    if (contentType.includes("application/json")) {
+      data = await response.json();
+    } else {
+      const text = await response.text();
+      showError(
+        "A server error occurred. Please try again later.\n\n" +
+          (text.length < 500 ? text : text.slice(0, 500) + "...")
+      );
+      return;
+    }
+
     if (!response.ok) {
-      const errorData = await response.json();
-      if (handleApiError(response, errorData)) {
+      if (handleApiError(response, data)) {
         return;
       }
     }
-
-    const data = await response.json();
 
     if (data.error) {
       showError(data.error);
