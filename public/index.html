@@ -99,12 +99,38 @@
       @keyframes scaleIn {
         from {
           opacity: 0;
-          transform: scale(0.98);
+          transform: scale(0.9);
         }
         to {
           opacity: 1;
           transform: scale(1);
         }
+      }
+
+      /* Improved checkbox styling and behavior */
+      .generator-checkbox {
+        transition: all 0.2s ease-in-out;
+      }
+
+      .generator-checkbox:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+
+      .generator-checkbox:not(:disabled):hover {
+        transform: scale(1.05);
+      }
+
+      .generator-label {
+        transition: all 0.2s ease-in-out;
+        cursor: pointer;
+      }
+
+      .generator-label.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
       }
 
       /* Dark mode styles */
@@ -871,13 +897,13 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <!-- Resume Summary Generator -->
               <label
-                class="flex items-start space-x-3 p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 cursor-pointer group"
+                class="flex items-start space-x-3 p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 cursor-pointer group generator-label"
               >
                 <input
                   type="checkbox"
                   id="includeSummaryGen"
                   checked
-                  class="mt-1 w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-dark-800 focus:ring-2 dark:bg-dark-700 dark:border-dark-600"
+                  class="mt-1 w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-dark-800 focus:ring-2 dark:bg-dark-700 dark:border-dark-600 generator-checkbox"
                 />
                 <div class="flex items-start space-x-3">
                   <div class="flex-shrink-0">
@@ -910,12 +936,12 @@
 
               <!-- Tailored Resume Generator -->
               <label
-                class="flex items-start space-x-3 p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 cursor-pointer group"
+                class="flex items-start space-x-3 p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 cursor-pointer group generator-label"
               >
                 <input
                   type="checkbox"
                   id="includeVariantGen"
-                  class="mt-1 w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-dark-800 focus:ring-2 dark:bg-dark-700 dark:border-dark-600"
+                  class="mt-1 w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-dark-800 focus:ring-2 dark:bg-dark-700 dark:border-dark-600 generator-checkbox"
                 />
                 <div class="flex items-start space-x-3">
                   <div class="flex-shrink-0">
@@ -949,12 +975,12 @@
 
               <!-- Cover Letter Generator -->
               <label
-                class="flex items-start space-x-3 p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 cursor-pointer group"
+                class="flex items-start space-x-3 p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 cursor-pointer group generator-label"
               >
                 <input
                   type="checkbox"
                   id="includeCoverGen"
-                  class="mt-1 w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-dark-800 focus:ring-2 dark:bg-dark-700 dark:border-dark-600"
+                  class="mt-1 w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-dark-800 focus:ring-2 dark:bg-dark-700 dark:border-dark-600 generator-checkbox"
                 />
                 <div class="flex items-start space-x-3">
                   <div class="flex-shrink-0">
@@ -987,12 +1013,12 @@
 
               <!-- LinkedIn Summary Optimizer -->
               <label
-                class="flex items-start space-x-3 p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 cursor-pointer group"
+                class="flex items-start space-x-3 p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 cursor-pointer group generator-label"
               >
                 <input
                   type="checkbox"
                   id="includeLinkedInGen"
-                  class="mt-1 w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-dark-800 focus:ring-2 dark:bg-dark-700 dark:border-dark-600"
+                  class="mt-1 w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-dark-800 focus:ring-2 dark:bg-dark-700 dark:border-dark-600 generator-checkbox"
                 />
                 <div class="flex items-start space-x-3">
                   <div class="flex-shrink-0">
@@ -1026,12 +1052,12 @@
 
               <!-- LaTeX Resume Generator -->
               <label
-                class="flex items-start space-x-3 p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 cursor-pointer group"
+                class="flex items-start space-x-3 p-4 rounded-lg bg-white dark:bg-dark-800 shadow-soft dark:shadow-dark-soft hover:shadow-soft-lg dark:hover:shadow-dark-soft transition-all duration-300 cursor-pointer group generator-label"
               >
                 <input
                   type="checkbox"
                   id="includeLatexGen"
-                  class="mt-1 w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-dark-800 focus:ring-2 dark:bg-dark-700 dark:border-dark-600"
+                  class="mt-1 w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-dark-800 focus:ring-2 dark:bg-dark-700 dark:border-dark-600 generator-checkbox"
                 />
                 <div class="flex items-start space-x-3">
                   <div class="flex-shrink-0">

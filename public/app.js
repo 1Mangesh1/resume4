@@ -548,7 +548,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
   showApiUsageIndicator();
 
-  initializeGeneratorCheckboxes();
+  // Initialize generator checkboxes with error handling
+  try {
+    initializeGeneratorCheckboxes();
+    console.log("✅ Generator checkboxes initialized successfully");
+  } catch (error) {
+    console.error("❌ Error initializing generator checkboxes:", error);
+  }
 
   initializeJobDescriptionListener();
 
@@ -2052,10 +2058,32 @@ function initializeGeneratorCheckboxes() {
   checkboxes.forEach((id) => {
     const checkbox = document.getElementById(id);
     if (checkbox) {
+      // Add event listener to both change and click events for better compatibility
       checkbox.addEventListener("change", function () {
+        console.log(`🔘 Checkbox ${id} changed to:`, this.checked);
         updateGeneratorUI();
         validateGeneratorSelection();
       });
+
+      // Also add click event listener to handle label clicks
+      checkbox.addEventListener("click", function (e) {
+        // Prevent double-triggering
+        e.stopPropagation();
+        console.log(`🔘 Checkbox ${id} clicked`);
+      });
+
+      // Add event listener to the parent label for better UX
+      const label = checkbox.closest("label");
+      if (label) {
+        label.addEventListener("click", function (e) {
+          // Only handle if the click wasn't directly on the checkbox
+          if (e.target !== checkbox) {
+            console.log(`🏷️ Label clicked for ${id}`);
+            checkbox.checked = !checkbox.checked;
+            checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        });
+      }
     }
   });
 
@@ -2074,10 +2102,10 @@ function updateGeneratorUI() {
     if (!hasJobDescription) {
       variantCheckbox.checked = false;
       variantCheckbox.disabled = true;
-      variantCheckbox.parentElement.classList.add("opacity-50");
+      variantCheckbox.parentElement.classList.add("disabled");
     } else {
       variantCheckbox.disabled = false;
-      variantCheckbox.parentElement.classList.remove("opacity-50");
+      variantCheckbox.parentElement.classList.remove("disabled");
     }
   }
 
@@ -2085,10 +2113,10 @@ function updateGeneratorUI() {
     if (!hasJobDescription) {
       coverCheckbox.checked = false;
       coverCheckbox.disabled = true;
-      coverCheckbox.parentElement.classList.add("opacity-50");
+      coverCheckbox.parentElement.classList.add("disabled");
     } else {
       coverCheckbox.disabled = false;
-      coverCheckbox.parentElement.classList.remove("opacity-50");
+      coverCheckbox.parentElement.classList.remove("disabled");
     }
   }
 }
