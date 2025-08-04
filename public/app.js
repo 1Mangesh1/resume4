@@ -1,21 +1,17 @@
-// DOM Elements - will be initialized after DOM loads
 let resumeText, resumeFile, jobDescription, analyzeBtn, clearBtn;
 let loadingState, errorState, errorMessage, resultsSection;
 
-// Tab elements and other DOM elements - will be initialized after DOM loads
 let textInputTab, fileInputTab, textInputSection, fileInputSection;
 let fileDropZone, fileInfo, fileName, fileSize;
 let includeClarity, includeImpact, includeATS, includeJDMatch;
 let jobDescriptionSection, inputGrid;
 
-// Generator elements
 let includeSummaryGen,
   includeVariantGen,
   includeCoverGen,
   includeLinkedInGen,
   includeLatexGen;
 
-// Result elements - will be initialized after DOM loads
 let overallScore,
   overallProgress,
   clarityScore,
@@ -29,7 +25,6 @@ let impactScore,
   atsFeedback;
 let formattingScore, formattingProgress, formattingFeedback;
 
-// All other elements - will be initialized after DOM loads
 let jdMatchSection, jdMatchScore, jdMatchProgress, jdMatchFeedback;
 let jdRecommendationsSection, jdRecommendationsList;
 let toneScore, toneProgress, toneType, toneFeedback;
@@ -40,17 +35,14 @@ let skillsScore, skillsProgress, hardSkills, softSkills, skillsRatio;
 let advancedInsights, strengthsList, suggestionsList;
 let themeToggle, proTipToast, dismissProTip;
 
-// Global variables
 let currentInputMethod = "file";
 let selectedFile = null;
 let isAnalyzing = false;
 
-// Add quota usage tracking and warnings
 let apiCallCount = parseInt(localStorage.getItem("apiCallCount") || "0");
 let lastResetDate =
   localStorage.getItem("lastResetDate") || new Date().toDateString();
 
-// Debounce function to prevent rapid UI updates
 function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
@@ -100,16 +92,13 @@ function trackApiCall() {
   showApiUsageIndicator();
 }
 
-// Dark Mode Functionality
 function initializeTheme() {
   const savedTheme = localStorage.getItem("theme");
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const html = document.documentElement;
 
-  // Remove any existing theme class first
   html.classList.remove("light", "dark");
 
-  // Set initial theme
   if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
     html.classList.add("dark");
     localStorage.setItem("theme", "dark");
@@ -118,7 +107,6 @@ function initializeTheme() {
     localStorage.setItem("theme", "light");
   }
 
-  // Watch for system theme changes
   window
     .matchMedia("(prefers-color-scheme: dark)")
     .addEventListener("change", (e) => {
@@ -139,16 +127,12 @@ function toggleTheme() {
   const isDark = html.classList.contains("dark");
   const newTheme = isDark ? "light" : "dark";
 
-  // Remove both classes first
   html.classList.remove("light", "dark");
 
-  // Add new theme class
   html.classList.add(newTheme);
 
-  // Save preference
   localStorage.setItem("theme", newTheme);
 
-  // Animate the transition
   document.body.style.transition = "background-color 0.3s ease";
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
@@ -156,26 +140,23 @@ function toggleTheme() {
     });
   });
 
-  // Track theme change
   if (window.va) {
     window.va("track", "Theme Changed", { theme: newTheme });
   }
 }
 
-// Pro Tip Toast Functionality
 function showProTip() {
   if (!proTipToast || localStorage.getItem("proTipDismissed")) {
     return;
   }
 
-  // Reset display style in case it was hidden
   proTipToast.style.display = "block";
   setTimeout(() => {
     if (proTipToast) {
       proTipToast.classList.remove("translate-x-full");
       proTipToast.classList.add("translate-x-0");
     }
-  }, 2000); // Show after 2 seconds
+  }, 2000);
 }
 
 function hideProTip() {
@@ -188,11 +169,9 @@ function hideProTip() {
 function dismissProTipPermanently() {
   if (!proTipToast) return;
 
-  // Slide out immediately
   proTipToast.classList.remove("translate-x-0");
   proTipToast.classList.add("translate-x-full");
 
-  // After animation completes, ensure it's completely hidden
   setTimeout(() => {
     if (proTipToast) {
       proTipToast.style.display = "none";
@@ -202,16 +181,12 @@ function dismissProTipPermanently() {
   localStorage.setItem("proTipDismissed", "true");
 }
 
-// Initialize theme immediately (before DOM loads to prevent flash)
 initializeTheme();
 
-// Initialize Vercel Analytics immediately
 if (typeof window !== "undefined" && window.va) {
-  // Track page view
   window.va("pageview");
 }
 
-// Smooth scroll with intersection observer
 function initializeScrollObserver() {
   const observer = new IntersectionObserver(
     (entries) => {
@@ -229,7 +204,6 @@ function initializeScrollObserver() {
   });
 }
 
-// Smooth scroll to results
 function smoothScrollToResults() {
   if (!resultsSection) return;
 
@@ -243,28 +217,23 @@ function smoothScrollToResults() {
   });
 }
 
-// Improved file handling
 function handleFileSelect(event) {
   const file = event.target.files[0] || event.dataTransfer?.files[0];
   if (!file) return;
 
-  // Reset UI
   clearForm();
 
-  // Update UI with file info
   selectedFile = file;
   fileName.textContent = file.name;
   fileSize.textContent = formatFileSize(file.size);
   fileInfo.classList.remove("hidden");
   fileInfo.classList.add("animate-fade-in");
 
-  // Enable analyze button
   analyzeBtn.disabled = false;
   analyzeBtn.classList.remove("opacity-50", "cursor-not-allowed");
   analyzeBtn.classList.add("hover:shadow-lg");
 }
 
-// Format file size
 function formatFileSize(bytes) {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
@@ -273,9 +242,7 @@ function formatFileSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 }
 
-// Clear form with animation
 function clearForm() {
-  // Fade out elements
   const elementsToFade = [fileInfo, resultsSection, errorState];
   elementsToFade.forEach((el) => {
     if (el && !el.classList.contains("hidden")) {
@@ -287,15 +254,12 @@ function clearForm() {
     }
   });
 
-  // Reset form elements
   if (resumeText) resumeText.value = "";
   if (resumeFile) resumeFile.value = "";
   if (jobDescription) jobDescription.value = "";
 
-  // Reset file selection
   selectedFile = null;
 
-  // Disable analyze button
   if (analyzeBtn) {
     analyzeBtn.disabled = true;
     analyzeBtn.classList.add("opacity-50", "cursor-not-allowed");
@@ -303,7 +267,6 @@ function clearForm() {
   }
 }
 
-// Show/hide states with animations
 function hideAllStates() {
   [loadingState, errorState, resultsSection].forEach((el) => {
     if (el && !el.classList.contains("hidden")) {
@@ -323,7 +286,6 @@ function showLoading() {
   loadingState.classList.remove("hidden");
   loadingState.classList.add("animate-fade-in");
 
-  // Disable analyze button while loading
   if (analyzeBtn) {
     analyzeBtn.disabled = true;
     analyzeBtn.classList.add("opacity-50", "cursor-not-allowed");
@@ -338,16 +300,13 @@ function showError(message) {
   errorState.classList.remove("hidden");
   errorState.classList.add("animate-fade-in");
 
-  // Re-enable analyze button
   if (analyzeBtn) {
     analyzeBtn.disabled = false;
     analyzeBtn.classList.remove("opacity-50", "cursor-not-allowed");
   }
 }
 
-// Initialize on DOM load
 document.addEventListener("DOMContentLoaded", function () {
-  // Initialize all DOM elements
   resumeText = document.getElementById("resumeText");
   resumeFile = document.getElementById("resumeFile");
   jobDescription = document.getElementById("jobDescription");
@@ -358,7 +317,6 @@ document.addEventListener("DOMContentLoaded", function () {
   errorMessage = document.getElementById("errorMessage");
   resultsSection = document.getElementById("resultsSection");
 
-  // Tab elements
   textInputTab = document.getElementById("textInputTab");
   fileInputTab = document.getElementById("fileInputTab");
   textInputSection = document.getElementById("textInputSection");
@@ -368,24 +326,20 @@ document.addEventListener("DOMContentLoaded", function () {
   fileName = document.getElementById("fileName");
   fileSize = document.getElementById("fileSize");
 
-  // Analysis option checkboxes
   includeClarity = document.getElementById("includeClarity");
   includeImpact = document.getElementById("includeImpact");
   includeATS = document.getElementById("includeATS");
   includeJDMatch = document.getElementById("includeJDMatch");
 
-  // Generator option checkboxes
   includeSummaryGen = document.getElementById("includeSummaryGen");
   includeVariantGen = document.getElementById("includeVariantGen");
   includeCoverGen = document.getElementById("includeCoverGen");
   includeLinkedInGen = document.getElementById("includeLinkedInGen");
   includeLatexGen = document.getElementById("includeLatexGen");
 
-  // Job Description Section elements
   jobDescriptionSection = document.getElementById("jobDescriptionSection");
   inputGrid = document.getElementById("inputGrid");
 
-  // Result elements
   overallScore = document.getElementById("overallScore");
   overallProgress = document.getElementById("overallProgress");
   clarityScore = document.getElementById("clarityScore");
@@ -401,7 +355,6 @@ document.addEventListener("DOMContentLoaded", function () {
   formattingProgress = document.getElementById("formattingProgress");
   formattingFeedback = document.getElementById("formattingFeedback");
 
-  // JD-specific elements
   jdMatchSection = document.getElementById("jdMatchSection");
   jdMatchScore = document.getElementById("jdMatchScore");
   jdMatchProgress = document.getElementById("jdMatchProgress");
@@ -411,7 +364,6 @@ document.addEventListener("DOMContentLoaded", function () {
   );
   jdRecommendationsList = document.getElementById("jdRecommendationsList");
 
-  // Advanced Analysis elements
   toneScore = document.getElementById("toneScore");
   toneProgress = document.getElementById("toneProgress");
   toneType = document.getElementById("toneType");
@@ -438,12 +390,10 @@ document.addEventListener("DOMContentLoaded", function () {
   strengthsList = document.getElementById("strengthsList");
   suggestionsList = document.getElementById("suggestionsList");
 
-  // Theme and UI elements
   themeToggle = document.getElementById("themeToggle");
   proTipToast = document.getElementById("proTipToast");
   dismissProTip = document.getElementById("dismissProTip");
 
-  // Event Listeners - Ensure DOM elements exist first
   if (analyzeBtn) {
     analyzeBtn.addEventListener("click", analyzeResume);
   }
@@ -456,10 +406,8 @@ document.addEventListener("DOMContentLoaded", function () {
   if (fileDropZone)
     fileDropZone.addEventListener("click", () => resumeFile.click());
 
-  // Dark mode toggle
   if (themeToggle) {
     themeToggle.addEventListener("click", () => {
-      // Add click animation
       themeToggle.classList.add("scale-95");
       setTimeout(() => themeToggle.classList.remove("scale-95"), 100);
 
@@ -467,25 +415,21 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Pro tip toast listeners
   if (dismissProTip)
     dismissProTip.addEventListener("click", dismissProTipPermanently);
 
-  // Auto-check JD matching when job description is entered
   if (jobDescription) {
     jobDescription.addEventListener("input", function () {
       if (this.value.trim().length > 50 && !includeJDMatch?.checked) {
         if (includeJDMatch) {
           includeJDMatch.checked = true;
-          toggleJobDescriptionSection(); // Trigger the section to show
+          toggleJobDescriptionSection();
         }
       }
     });
 
-    // Show pro tip when job description is focused (if not permanently dismissed)
     jobDescription.addEventListener("focus", function () {
       if (!localStorage.getItem("proTipDismissed")) {
-        // Reset display style in case it was hidden
         proTipToast.style.display = "block";
         setTimeout(() => {
           proTipToast.classList.remove("translate-x-full");
@@ -495,11 +439,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Job Description Matching checkbox toggle
   if (includeJDMatch)
     includeJDMatch.addEventListener("change", toggleJobDescriptionSection);
 
-  // File drag and drop
   if (fileDropZone) {
     fileDropZone.addEventListener("dragover", (e) => {
       e.preventDefault();
@@ -533,11 +475,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Floating label functionality
   const textareas = document.querySelectorAll(".textarea-focus");
 
   textareas.forEach((textarea) => {
-    // Handle focus/blur states
     textarea.addEventListener("focus", function () {
       this.parentElement.classList.add("focused");
     });
@@ -546,7 +486,6 @@ document.addEventListener("DOMContentLoaded", function () {
       this.parentElement.classList.remove("focused");
     });
 
-    // Handle content state
     textarea.addEventListener("input", function () {
       if (this.value.trim() !== "") {
         this.classList.add("has-content");
@@ -555,16 +494,13 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-    // Check initial state
     if (textarea.value.trim() !== "") {
       textarea.classList.add("has-content");
     }
   });
 
-  // Initialize scroll observer
   initializeScrollObserver();
 
-  // Add smooth scroll behavior to all internal links
   document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     anchor.addEventListener("click", function (e) {
       e.preventDefault();
@@ -583,17 +519,14 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Initialize theme
   initializeTheme();
 
-  // Override showResults to include smooth scroll
   const originalShowResults = showResults;
   window.showResults = function (data) {
     originalShowResults(data);
     smoothScrollToResults();
   };
 
-  // Add subtle hover animations to checkboxes
   const checkboxes = document.querySelectorAll('input[type="checkbox"]');
   checkboxes.forEach((checkbox) => {
     checkbox.addEventListener("change", function () {
@@ -601,7 +534,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Add loading animation to progress bars
   const progressBars = document.querySelectorAll(".progress-bar");
   progressBars.forEach((bar) => {
     bar.addEventListener("transitionstart", function () {
@@ -612,79 +544,64 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Show pro tip on page load (if not dismissed) - after DOM is ready
   showProTip();
 
-  // Show API usage indicator
   showApiUsageIndicator();
 
-  // Initialize generator checkboxes
   initializeGeneratorCheckboxes();
 
-  // Initialize job description listener
   initializeJobDescriptionListener();
 
-  // Set file input as default
   switchInputMethod("file");
 
   console.log("✨ Professional Resume Analyzer UI initialized successfully!");
 });
 
-// Job Description Section Toggle Function
 function toggleJobDescriptionSection() {
   const isChecked = includeJDMatch?.checked || false;
 
-  // Track job description matching toggle
   if (window.va) {
     window.va("track", "Job Description Matching", { enabled: isChecked });
   }
 
   if (isChecked) {
-    // Show job description section
     if (jobDescriptionSection) {
       jobDescriptionSection.classList.remove("hidden");
-      // Use setTimeout to ensure the element is rendered before animating
+
       setTimeout(() => {
         jobDescriptionSection.classList.remove("opacity-0", "translate-y-4");
         jobDescriptionSection.classList.add("opacity-100", "translate-y-0");
       }, 10);
     }
 
-    // Change grid to 2 columns
     if (inputGrid) {
       inputGrid.classList.remove("lg:grid-cols-1");
       inputGrid.classList.add("lg:grid-cols-2");
     }
   } else {
-    // Hide job description section
     if (jobDescriptionSection) {
       jobDescriptionSection.classList.remove("opacity-100", "translate-y-0");
       jobDescriptionSection.classList.add("opacity-0", "translate-y-4");
 
-      // Hide after animation completes
       setTimeout(() => {
         jobDescriptionSection.classList.add("hidden");
       }, 500);
     }
 
-    // Change grid to 1 column
     if (inputGrid) {
       inputGrid.classList.remove("lg:grid-cols-2");
       inputGrid.classList.add("lg:grid-cols-1");
     }
 
-    // Clear job description content when hidden
     if (jobDescription) {
       jobDescription.value = "";
     }
   }
 }
 
-// Switch between input methods
 function switchInputMethod(method) {
   currentInputMethod = method;
 
-  // Track input method switch
   if (window.va) {
     window.va("track", "Input Method Changed", { method: method });
   }
@@ -708,12 +625,10 @@ function switchInputMethod(method) {
   }
 }
 
-// Handle file selection
 function handleFileSelect(event) {
   const file = event.target.files[0];
   if (!file) return;
 
-  // Validate file type
   const allowedTypes = [
     "application/pdf",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -724,7 +639,6 @@ function handleFileSelect(event) {
     return;
   }
 
-  // Validate file size (10MB limit)
   if (file.size > 10 * 1024 * 1024) {
     showError("File size must be less than 10MB.");
     return;
@@ -732,7 +646,6 @@ function handleFileSelect(event) {
 
   selectedFile = file;
 
-  // Track file upload
   if (window.va) {
     window.va("track", "File Uploaded", {
       fileType: file.type,
@@ -740,12 +653,10 @@ function handleFileSelect(event) {
     });
   }
 
-  // Show file info
   fileName.textContent = file.name;
   fileSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
   fileInfo.classList.remove("hidden");
 
-  // Update file drop zone with success state
   fileDropZone.innerHTML = `
     <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-2xl mb-4">
       <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -758,18 +669,15 @@ function handleFileSelect(event) {
   `;
 }
 
-// Clear form function
 function clearForm() {
   resumeText.value = "";
   jobDescription.value = "";
   selectedFile = null;
   resumeFile.value = "";
 
-  // Reset checkboxes and hide job description section
   if (includeJDMatch) includeJDMatch.checked = false;
   toggleJobDescriptionSection();
 
-  // Reset file input section
   fileInfo.classList.add("hidden");
   fileDropZone.innerHTML = `
     <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-2xl mb-4">
@@ -785,7 +693,6 @@ function clearForm() {
   hideAllStates();
 }
 
-// Hide all states
 function hideAllStates() {
   if (loadingState) loadingState.classList.add("hidden");
   if (errorState) errorState.classList.add("hidden");
@@ -793,16 +700,12 @@ function hideAllStates() {
   if (jdMatchSection) jdMatchSection.classList.add("hidden");
   if (jdRecommendationsSection)
     jdRecommendationsSection.classList.add("hidden");
-
-  // Don't hide generators section - it should always be visible
 }
 
-// Show loading state
 function showLoading() {
   hideAllStates();
   if (loadingState) loadingState.classList.remove("hidden");
 
-  // Disable analyze button and show loading state
   if (analyzeBtn) {
     analyzeBtn.disabled = true;
     analyzeBtn.innerHTML = `
@@ -814,12 +717,10 @@ function showLoading() {
   }
 }
 
-// Show error state
 function showError(message) {
   hideAllStates();
   errorState.style.display = "block";
 
-  // Handle multiline messages with proper formatting
   if (message.includes("\n")) {
     const lines = message.split("\n");
     errorMessage.innerHTML = lines
@@ -849,7 +750,6 @@ function showResults(data) {
   hideAllStates();
   resultsSection.classList.remove("hidden");
 
-  // Re-enable analyze button
   if (analyzeBtn) {
     analyzeBtn.disabled = false;
     analyzeBtn.innerHTML = `
@@ -860,7 +760,6 @@ function showResults(data) {
     `;
   }
 
-  // Update scores and progress bars
   updateScore(overallScore, overallProgress, data.overall_score);
   updateScore(clarityScore, clarityProgress, data.sections?.clarity?.score);
   updateScore(impactScore, impactProgress, data.sections?.impact?.score);
@@ -871,7 +770,6 @@ function showResults(data) {
     data.sections?.formatting?.score
   );
 
-  // Update feedback sections
   if (clarityFeedback)
     clarityFeedback.textContent = data.sections?.clarity?.feedback || "";
   if (impactFeedback)
@@ -881,7 +779,6 @@ function showResults(data) {
   if (formattingFeedback)
     formattingFeedback.textContent = data.sections?.formatting?.feedback || "";
 
-  // Update JD match section if available
   if (data.jd_match) {
     jdMatchSection?.classList.remove("hidden");
     updateScore(jdMatchScore, jdMatchProgress, data.jd_match.score);
@@ -891,7 +788,6 @@ function showResults(data) {
     jdMatchSection?.classList.add("hidden");
   }
 
-  // Update JD recommendations if available
   if (data.jd_recommendations && data.jd_recommendations.length > 0) {
     jdRecommendationsSection?.classList.remove("hidden");
     updateList(jdRecommendationsList, data.jd_recommendations);
@@ -899,23 +795,18 @@ function showResults(data) {
     jdRecommendationsSection?.classList.add("hidden");
   }
 
-  // Update strengths and suggestions
   updateList(strengthsList, data.strengths);
   updateList(suggestionsList, data.top_suggestions);
 
-  // Update advanced analysis if available
   if (data.advanced_analysis) {
     updateAdvancedAnalysis(data.advanced_analysis);
   }
 
-  // Display generated content
   displayGeneratedContent(data);
 
-  // Smooth scroll to results
   smoothScrollToResults();
 }
 
-// Update score and progress bar
 function updateScore(scoreElement, progressElement, score, suffix = "/100") {
   if (scoreElement) scoreElement.textContent = `${score}${suffix}`;
   if (progressElement) {
@@ -925,7 +816,6 @@ function updateScore(scoreElement, progressElement, score, suffix = "/100") {
   }
 }
 
-// Update lists
 function updateList(listElement, items) {
   listElement.innerHTML = "";
   items.forEach((item) => {
@@ -942,9 +832,7 @@ function updateList(listElement, items) {
   }
 }
 
-// Update advanced analysis section
 function updateAdvancedAnalysis(advancedData) {
-  // Tone Evaluation
   if (advancedData.tone_evaluation) {
     const tone = advancedData.tone_evaluation;
     if (toneScore && toneProgress) {
@@ -955,7 +843,6 @@ function updateAdvancedAnalysis(advancedData) {
       toneFeedback.textContent = tone.feedback || "No tone feedback available";
   }
 
-  // Bullet Point Grade
   if (advancedData.bullet_point_grade) {
     const bullet = advancedData.bullet_point_grade;
     if (bulletScore && bulletProgress) {
@@ -973,7 +860,6 @@ function updateAdvancedAnalysis(advancedData) {
     }
   }
 
-  // Buzzword Detection
   if (advancedData.buzzword_detection) {
     const buzzword = advancedData.buzzword_detection;
     if (buzzwordScore && buzzwordProgress) {
@@ -983,7 +869,6 @@ function updateAdvancedAnalysis(advancedData) {
     formatBuzzwordList(buzzword.buzzwords_found || []);
   }
 
-  // Red Flags
   if (advancedData.red_flags) {
     const redFlag = advancedData.red_flags;
     if (redFlagScore && redFlagProgress) {
@@ -993,7 +878,6 @@ function updateAdvancedAnalysis(advancedData) {
     formatRedFlagList(redFlag.flags_detected || []);
   }
 
-  // Skills Balance
   if (advancedData.skills_balance) {
     const skills = advancedData.skills_balance;
     if (skillsScore && skillsProgress) {
@@ -1004,11 +888,9 @@ function updateAdvancedAnalysis(advancedData) {
     if (skillsRatio) skillsRatio.textContent = skills.balance_ratio || "--";
   }
 
-  // Generate advanced insights
   generateAdvancedInsights(advancedData);
 }
 
-// Format buzzword list
 function formatBuzzwordList(buzzwords) {
   if (!buzzwordList) return;
 
@@ -1031,7 +913,6 @@ function formatBuzzwordList(buzzwords) {
   buzzwordList.innerHTML = buzzwordItems + moreText;
 }
 
-// Format red flag list
 function formatRedFlagList(flags) {
   if (!redFlagList) return;
 
@@ -1054,39 +935,33 @@ function formatRedFlagList(flags) {
   redFlagList.innerHTML = flagItems + moreText;
 }
 
-// Generate advanced insights
 function generateAdvancedInsights(advancedData) {
   const insights = [];
 
-  // Tone insights
   if (advancedData.tone_evaluation?.score >= 80) {
     insights.push("• Professional tone detected");
   } else if (advancedData.tone_evaluation?.score < 60) {
     insights.push("• Consider improving tone consistency");
   }
 
-  // Bullet point insights
   if (advancedData.bullet_point_grade?.action_verbs_count >= 5) {
     insights.push("• Good use of action verbs");
   } else {
     insights.push("• Add more action verbs to bullets");
   }
 
-  // Buzzword insights
   if (advancedData.buzzword_detection?.buzzword_count === 0) {
     insights.push("• Excellent: No buzzwords detected");
   } else if (advancedData.buzzword_detection?.buzzword_count > 3) {
     insights.push("• Warning: Too many buzzwords");
   }
 
-  // Red flag insights
   if (advancedData.red_flags?.flag_count === 0) {
     insights.push("• Clean resume: No red flags");
   } else {
     insights.push("• Address detected red flags");
   }
 
-  // Skills balance insights
   const skillsBalance = advancedData.skills_balance;
   if (skillsBalance) {
     const hardCount = skillsBalance.hard_skills_count || 0;
@@ -1098,7 +973,6 @@ function generateAdvancedInsights(advancedData) {
     }
   }
 
-  // Default insights if none generated
   if (insights.length === 0) {
     insights.push("• Analysis complete - see detailed scores above");
     insights.push("• Focus on top suggestions for improvement");
@@ -1111,7 +985,6 @@ function generateAdvancedInsights(advancedData) {
   }
 }
 
-// Function to display generated content
 function displayGeneratedContent(data) {
   const contentContainer = document.getElementById("generatedContent");
   if (!contentContainer) return;
@@ -1119,7 +992,6 @@ function displayGeneratedContent(data) {
   contentContainer.innerHTML = "";
   let hasGeneratedContent = false;
 
-  // Helper function to safely escape strings for HTML
   function escapeHtml(text) {
     if (!text || typeof text !== "string") return "";
     const div = document.createElement("div");
@@ -1127,13 +999,11 @@ function displayGeneratedContent(data) {
     return div.innerHTML;
   }
 
-  // Helper function to safely escape strings for onclick attributes
   function escapeForOnclick(text) {
     if (!text || typeof text !== "string") return "";
     return text.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, "\\n");
   }
 
-  // Resume Summary Generator
   if (data.resume_summary && data.resume_summary.optimized_summary) {
     hasGeneratedContent = true;
     const summaryDiv = document.createElement("div");
@@ -1196,7 +1066,6 @@ function displayGeneratedContent(data) {
     contentContainer.appendChild(summaryDiv);
   }
 
-  // Tailored Resume Generator
   if (data.tailored_resume) {
     hasGeneratedContent = true;
     const variantDiv = document.createElement("div");
@@ -1389,7 +1258,6 @@ function displayGeneratedContent(data) {
     contentContainer.appendChild(variantDiv);
   }
 
-  // Cover Letter Generator
   if (data.cover_letter && data.cover_letter.full_letter) {
     hasGeneratedContent = true;
     const coverDiv = document.createElement("div");
@@ -1436,7 +1304,6 @@ function displayGeneratedContent(data) {
     contentContainer.appendChild(coverDiv);
   }
 
-  // LinkedIn Summary Optimizer
   if (data.linkedin_summary && data.linkedin_summary.linkedin_summary) {
     hasGeneratedContent = true;
     const linkedinDiv = document.createElement("div");
@@ -1553,7 +1420,6 @@ function displayGeneratedContent(data) {
     contentContainer.appendChild(linkedinDiv);
   }
 
-  // LaTeX Resume Generator
   if (data.latex_resume && data.latex_resume.latex_source) {
     hasGeneratedContent = true;
     const latexDiv = document.createElement("div");
@@ -1604,19 +1470,16 @@ function displayGeneratedContent(data) {
     contentContainer.appendChild(latexDiv);
   }
 
-  // Show the container if we have content
   if (hasGeneratedContent && !contentContainer.classList.contains("block")) {
     contentContainer.classList.remove("hidden");
     contentContainer.classList.add("block");
 
-    // Scroll to generated content
     setTimeout(() => {
       contentContainer.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 100);
   }
 }
 
-// Helper function to copy text to clipboard
 function copyToClipboard(text, button) {
   navigator.clipboard
     .writeText(text)
@@ -1634,7 +1497,7 @@ function copyToClipboard(text, button) {
     })
     .catch((err) => {
       console.error("Failed to copy text: ", err);
-      // Fallback for older browsers
+
       const textArea = document.createElement("textarea");
       textArea.value = text;
       document.body.appendChild(textArea);
@@ -1661,13 +1524,9 @@ function copyToClipboard(text, button) {
     });
 }
 
-// LaTeX utility functions
-
-// Main analyze function
 async function analyzeResume() {
   let resumeContent = "";
 
-  // Get resume content based on input method
   if (currentInputMethod === "text") {
     resumeContent = resumeText.value.trim();
     if (!resumeContent) {
@@ -1681,13 +1540,11 @@ async function analyzeResume() {
     }
   }
 
-  // Minimum content validation for text input
   if (currentInputMethod === "text" && resumeContent.length < 100) {
     showError("Please enter a more complete resume (at least 100 characters).");
     return;
   }
 
-  // Track resume analysis start
   if (window.va) {
     window.va("track", "Resume Analysis Started", {
       inputMethod: currentInputMethod,
@@ -1703,7 +1560,6 @@ async function analyzeResume() {
 
   showLoading();
 
-  // Track API usage
   trackApiCall();
 
   try {
@@ -1715,13 +1571,11 @@ async function analyzeResume() {
       formData.append("resumeText", resumeContent);
     }
 
-    // Add job description if provided
     const jdText = jobDescription.value.trim();
     if (jdText) {
       formData.append("jobDescription", jdText);
     }
 
-    // Add analysis options
     formData.append("includeClarity", includeClarity?.checked || false);
     formData.append("includeImpact", includeImpact?.checked || false);
     formData.append("includeATS", includeATS?.checked || false);
@@ -1730,7 +1584,6 @@ async function analyzeResume() {
       (includeJDMatch?.checked || false) && jdText.length > 0
     );
 
-    // Add generator options
     formData.append("includeSummaryGen", includeSummaryGen?.checked || false);
     formData.append("includeVariantGen", includeVariantGen?.checked || false);
     formData.append("includeCoverGen", includeCoverGen?.checked || false);
@@ -1742,7 +1595,6 @@ async function analyzeResume() {
       body: formData,
     });
 
-    // Check if response is JSON
     const contentType = response.headers.get("content-type") || "";
     let data;
     if (contentType.includes("application/json")) {
@@ -1767,7 +1619,6 @@ async function analyzeResume() {
       return;
     }
 
-    // Track successful analysis completion
     if (window.va) {
       window.va("track", "Resume Analysis Completed", {
         overallScore: data.overall_score || "unknown",
@@ -1776,12 +1627,10 @@ async function analyzeResume() {
       });
     }
 
-    // Show results and generators section
     showResults(data);
   } catch (error) {
     console.error("Analysis error:", error);
 
-    // Track analysis errors
     if (window.va) {
       window.va("track", "Resume Analysis Error", {
         error: error.message || "Unknown error",
@@ -1794,7 +1643,6 @@ async function analyzeResume() {
   }
 }
 
-// LaTeX utility functions
 function downloadLatexSource(latexContent, templateName) {
   const blob = new Blob([latexContent], { type: "text/plain" });
   const url = URL.createObjectURL(blob);
@@ -1816,7 +1664,6 @@ function downloadPDF(base64Data, filename) {
 }
 
 async function regenerateLatexResume(selectedTemplate = "modern") {
-  // Get current resume data
   let resumeContent = "";
   if (currentInputMethod === "text") {
     resumeContent = resumeText.value.trim();
@@ -1830,7 +1677,6 @@ async function regenerateLatexResume(selectedTemplate = "modern") {
     return;
   }
 
-  // Show loading state
   const regenerateButtons = document.querySelectorAll('[id^="regenerate-"]');
   regenerateButtons.forEach((btn) => {
     btn.disabled = true;
@@ -1844,17 +1690,15 @@ async function regenerateLatexResume(selectedTemplate = "modern") {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         resumeText: resumeContent,
-        analysisData: null, // Could pass last analysis results
+        analysisData: null,
         templateName: selectedTemplate,
       }),
     });
 
     const data = await response.json();
     if (data.success || data.latex_source) {
-      // Update the display with new LaTeX content
       displayGeneratedContent({ latex_resume: data });
 
-      // Show success message
       showMessage("LaTeX resume regenerated successfully!", "success");
     } else {
       showError(data.error || "Failed to regenerate LaTeX resume");
@@ -1863,7 +1707,6 @@ async function regenerateLatexResume(selectedTemplate = "modern") {
     console.error("Error regenerating LaTeX resume:", error);
     showError("Failed to regenerate LaTeX resume. Please try again.");
   } finally {
-    // Reset button states
     regenerateButtons.forEach((btn) => {
       btn.disabled = false;
       btn.textContent = "Regenerate";
@@ -1872,7 +1715,6 @@ async function regenerateLatexResume(selectedTemplate = "modern") {
   }
 }
 
-// Helper function to show temporary messages
 function showMessage(message, type = "info") {
   const messageDiv = document.createElement("div");
   messageDiv.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
@@ -1891,7 +1733,6 @@ function showMessage(message, type = "info") {
   }, 3000);
 }
 
-// Sample data for testing (remove in production)
 function showSampleResults() {
   const sampleData = {
     overall_score: 78,
@@ -1934,9 +1775,6 @@ function showSampleResults() {
   showResults(sampleData);
 }
 
-// For development - remove in production
-// analyzeBtn.addEventListener('dblclick', showSampleResults);
-
 function copyLatexToClipboard(latexId) {
   const latexElement = document.getElementById(`latexCode-${latexId}`);
 
@@ -1952,7 +1790,6 @@ function copyLatexToClipboard(latexId) {
     return;
   }
 
-  // Try modern clipboard API first
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard
       .writeText(latexContent)
@@ -1964,7 +1801,6 @@ function copyLatexToClipboard(latexId) {
         fallbackCopyText(latexContent);
       });
   } else {
-    // Fallback for older browsers
     fallbackCopyText(latexContent);
   }
 }
@@ -2024,7 +1860,6 @@ async function downloadPdf(latexId) {
   ).textContent;
   const button = document.getElementById(`downloadPdf-${latexId}`);
 
-  // Show loading state
   const originalText = button.textContent;
   button.textContent = "⏳ Generating PDF...";
   button.disabled = true;
@@ -2039,10 +1874,8 @@ async function downloadPdf(latexId) {
     });
 
     if (response.ok) {
-      // Check if it's a PDF response
       const contentType = response.headers.get("Content-Type");
       if (contentType && contentType.includes("application/pdf")) {
-        // Download PDF
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -2081,7 +1914,6 @@ async function downloadPdf(latexId) {
       "error"
     );
   } finally {
-    // Restore button state
     button.textContent = originalText;
     button.disabled = false;
   }
@@ -2114,7 +1946,6 @@ function showToast(message, type = "info") {
 
   document.body.appendChild(toast);
 
-  // Auto remove after 5 seconds
   setTimeout(() => {
     toast.style.opacity = "0";
     setTimeout(() => {
@@ -2123,11 +1954,9 @@ function showToast(message, type = "info") {
   }, 5000);
 }
 
-// Display current API usage indicator
 function showApiUsageIndicator() {
   const today = new Date().toDateString();
 
-  // Reset counter if it's a new day
   if (lastResetDate !== today) {
     apiCallCount = 0;
     lastResetDate = today;
@@ -2135,7 +1964,6 @@ function showApiUsageIndicator() {
     localStorage.setItem("apiCallCount", "0");
   }
 
-  // Create or update usage indicator
   let indicator = document.getElementById("api-usage-indicator");
   if (!indicator) {
     indicator = document.createElement("div");
@@ -2158,9 +1986,7 @@ function showApiUsageIndicator() {
   indicator.textContent = `API: ${apiCallCount}/50`;
 }
 
-// Enhanced error handling for API responses
 function handleApiError(response, errorData) {
-  // Handle rate limit errors specifically
   if (response.status === 429) {
     const suggestions = errorData.suggestions || [];
     const suggestionsList = suggestions.map((s) => `• ${s}`).join("\n");
@@ -2172,7 +1998,6 @@ function handleApiError(response, errorData) {
         `🔄 Your quota will reset in ${errorData.retryAfter || "24 hours"}`
     );
 
-    // Add demo mode button
     const demoButton = document.createElement("button");
     demoButton.className =
       "mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors";
@@ -2189,7 +2014,6 @@ function handleApiError(response, errorData) {
       errorMessage.appendChild(demoButton);
     }
 
-    // Show demo mode message if available
     if (errorData.demoMode) {
       setTimeout(() => {
         showToast(
@@ -2199,10 +2023,9 @@ function handleApiError(response, errorData) {
       }, 2000);
     }
 
-    return true; // Error handled
+    return true;
   }
 
-  // Handle other errors
   const errorMessage =
     errorData.message || errorData.error || "Analysis failed";
   const suggestions = errorData.suggestions || [];
@@ -2214,10 +2037,9 @@ function handleApiError(response, errorData) {
     showError(errorMessage);
   }
 
-  return true; // Error handled
+  return true;
 }
 
-// Initialize generator checkboxes
 function initializeGeneratorCheckboxes() {
   const checkboxes = [
     "includeSummaryGen",
@@ -2230,7 +2052,6 @@ function initializeGeneratorCheckboxes() {
   checkboxes.forEach((id) => {
     const checkbox = document.getElementById(id);
     if (checkbox) {
-      // Add change event listener
       checkbox.addEventListener("change", function () {
         updateGeneratorUI();
         validateGeneratorSelection();
@@ -2238,17 +2059,14 @@ function initializeGeneratorCheckboxes() {
     }
   });
 
-  // Initial validation
   validateGeneratorSelection();
 }
 
-// Update generator UI based on selections
 function updateGeneratorUI() {
   const jobDescription = document.getElementById("jobDescription");
   const hasJobDescription =
     jobDescription && jobDescription.value.trim().length > 0;
 
-  // Update variant and cover letter checkboxes based on job description
   const variantCheckbox = document.getElementById("includeVariantGen");
   const coverCheckbox = document.getElementById("includeCoverGen");
 
@@ -2275,7 +2093,6 @@ function updateGeneratorUI() {
   }
 }
 
-// Validate generator selection
 function validateGeneratorSelection() {
   const checkboxes = [
     "includeSummaryGen",
@@ -2302,11 +2119,9 @@ function validateGeneratorSelection() {
     }
   }
 
-  // Update API usage indicator
   updateApiUsage();
 }
 
-// Add job description change listener
 function initializeJobDescriptionListener() {
   const jobDescription = document.getElementById("jobDescription");
   if (jobDescription) {
