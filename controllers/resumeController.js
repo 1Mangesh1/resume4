@@ -50,19 +50,27 @@ const analyzeResume = async (req, res) => {
     }
 
     const options = {
-      includeClarity: req.body.includeClarity === "true",
-      includeImpact: req.body.includeImpact === "true",
-      includeATS: req.body.includeATS === "true",
-      includeJDMatch: req.body.includeJDMatch === "true",
+      includeClarity: req.body.includeClarity === "true" || req.body.includeClarity === true,
+      includeImpact: req.body.includeImpact === "true" || req.body.includeImpact === true,
+      includeATS: req.body.includeATS === "true" || req.body.includeATS === true,
+      includeJDMatch: req.body.includeJDMatch === "true" || req.body.includeJDMatch === true,
     };
 
     const generatorOptions = {
-      includeSummaryGen: req.body.includeSummaryGen === "true",
-      includeVariantGen: req.body.includeVariantGen === "true",
-      includeCoverGen: req.body.includeCoverGen === "true",
-      includeLinkedInGen: req.body.includeLinkedInGen === "true",
-      includeLatexGen: req.body.includeLatexGen === "true",
+      includeSummaryGen: req.body.includeSummaryGen === "true" || req.body.includeSummaryGen === true || 
+                        (req.body.generatorOptions && req.body.generatorOptions.includeSummaryGen),
+      includeVariantGen: req.body.includeVariantGen === "true" || req.body.includeVariantGen === true || 
+                        (req.body.generatorOptions && req.body.generatorOptions.includeVariantGen),
+      includeCoverGen: req.body.includeCoverGen === "true" || req.body.includeCoverGen === true || 
+                      (req.body.generatorOptions && req.body.generatorOptions.includeCoverGen),
+      includeLinkedInGen: req.body.includeLinkedInGen === "true" || req.body.includeLinkedInGen === true || 
+                         (req.body.generatorOptions && req.body.generatorOptions.includeLinkedInGen),
+      includeLatexGen: req.body.includeLatexGen === "true" || req.body.includeLatexGen === true || 
+                      (req.body.generatorOptions && req.body.generatorOptions.includeLatexGen),
     };
+
+    console.log("🔍 Request body generatorOptions:", req.body.generatorOptions);
+    console.log("🔍 Final generatorOptions:", generatorOptions);
 
     const jobDescription = req.body.jobDescription || null;
 
