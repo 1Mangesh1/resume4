@@ -27,6 +27,7 @@ router.get("/api/conversation-history", historyController.getHistory);
 
 // LaTeX routes
 router.post("/api/generate-latex-resume", latexController.generateLatexResume);
+router.post("/api/generate-best-resume", resumeController.generateBestResume);
 router.get("/api/latex-templates", latexController.getLatexTemplates);
 router.post("/api/compile-latex-pdf", latexController.compileLatexPdf);
 router.post("/api/download-latex-pdf", latexController.downloadLatexPdf);

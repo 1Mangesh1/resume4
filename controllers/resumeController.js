@@ -401,10 +401,56 @@ const generateSummary = async (req, res) => {
     }
   };
 
+const generateBestResume = async (req, res) => {
+  try {
+    if (!aiService) {
+      return res.status(500).json({
+        error: "AI Service not available",
+        message: "AI service is not properly configured."
+      });
+    }
+
+    const { resumeText, analysisData } = req.body;
+
+    if (!resumeText) {
+      return res.status(400).json({
+        error: "Resume text is required"
+      });
+    }
+
+    console.log("🎯 Generating best resume with AI...");
+    
+    const result = await aiService.generateBestResume(resumeText, analysisData);
+    
+    if (result.success) {
+      console.log("✅ Best resume generated successfully");
+      res.json({
+        success: true,
+        latex_code: result.latex_code,
+        preview_url: result.preview_url,
+        message: result.message
+      });
+    } else {
+      console.error("❌ Resume generation failed:", result.error);
+      res.status(500).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    console.error("Best resume generation error:", error);
+    res.status(500).json({ 
+      success: false,
+      error: "Failed to generate best resume" 
+    });
+  }
+};
+
 module.exports = {
   analyzeResume,
   generateSummary,
   generateVariant,
   generateCoverLetter,
-  optimizeLinkedIn
+  optimizeLinkedIn,
+  generateBestResume
 };
