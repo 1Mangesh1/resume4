@@ -1299,6 +1299,16 @@
               </svg>
               Copy LaTeX Code
             </button>
+
+            <button
+              id="downloadPdfBtn"
+              class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M7 10l5 5m0 0l5-5m-5 5V4"></path>
+              </svg>
+              Download PDF
+            </button>
           </div>
 
           <!-- Two-pane layout: left LaTeX code, right PDF preview -->
@@ -1805,7 +1815,13 @@
       window.generateBestResume = window.generateBestResume || function(){ console.warn('generateBestResume not yet loaded'); };
       window.previewResumePdfInline = window.previewResumePdfInline || function(){ console.warn('previewResumePdfInline not yet loaded'); };
       window.copyLatexCode = window.copyLatexCode || function(){ console.warn('copyLatexCode not yet loaded'); };
+      // Backward-compat: map old name to new inline preview
+      window.previewResumeOnTexlive = window.previewResumeOnTexlive || function(){
+        if (window.previewResumePdfInline) return window.previewResumePdfInline();
+        console.warn('previewResumeOnTexlive alias not yet loaded');
+      };
+  window.downloadLatexPdf = window.downloadLatexPdf || function(){ console.warn('downloadLatexPdf not yet loaded'); };
     </script>
-    <script src="app.js"></script>
+    <script src="app.js?v=2025-08-08-3"></script>
   </body>
 </html>

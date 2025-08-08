@@ -19,41 +19,24 @@ let overallScore,
   clarityFeedback;
 let impactScore,
   impactProgress,
-  impactFeedback,
-  atsScore,
-  atsProgress,
-  atsFeedback;
-let formattingScore, formattingProgress, formattingFeedback;
+  impactFeedback;
 
-let jdMatchSection, jdMatchScore, jdMatchProgress, jdMatchFeedback;
-let jdRecommendationsSection, jdRecommendationsList;
-let toneScore, toneProgress, toneType, toneFeedback;
-let bulletScore, bulletProgress, actionVerbs, quantifiedBullets, bulletFeedback;
-let buzzwordScore, buzzwordProgress, buzzwordCount, buzzwordList;
-let redFlagScore, redFlagProgress, redFlagCount, redFlagList;
-let skillsScore, skillsProgress, hardSkills, softSkills, skillsRatio;
-let advancedInsights, strengthsList, suggestionsList;
-let themeToggle, proTipToast, dismissProTip;
-
-let currentInputMethod = "file";
-let selectedFile = null;
-let isAnalyzing = false;
-
-let apiCallCount = parseInt(localStorage.getItem("apiCallCount") || "0");
-let lastResetDate =
-  localStorage.getItem("lastResetDate") || new Date().toDateString();
-
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
+// Tiny debounce utility used for text input listeners
+function debounce(fn, wait = 300) {
+  let t;
+  return function (...args) {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(this, args), wait);
   };
 }
+
+// Global state with safe defaults to avoid ReferenceErrors
+let apiCallCount = parseInt(localStorage.getItem("apiCallCount") || "0", 10);
+let lastResetDate =
+  localStorage.getItem("lastResetDate") || new Date().toDateString();
+let currentInputMethod =
+  localStorage.getItem("currentInputMethod") || "file"; // 'text' | 'file'
+let selectedFile = null;
 
 function updateApiUsage() {
   const today = new Date().toDateString();
@@ -446,17 +429,46 @@ document.addEventListener("DOMContentLoaded", function () {
   const generateBestResumeBtn = document.getElementById("generateBestResumeBtn");
   const previewResumeBtn = document.getElementById("previewResumeBtn");
   const copyLatexBtn = document.getElementById("copyLatexBtn");
+  const downloadPdfBtn = document.getElementById("downloadPdfBtn");
   
   if (generateBestResumeBtn) {
-    generateBestResumeBtn.addEventListener("click", generateBestResume);
+    generateBestResumeBtn.addEventListener("click", () => {
+      if (window.generateBestResume) {
+        window.generateBestResume();
+      } else {
+        console.error("generateBestResume not available yet");
+      }
+    });
   }
-  
+
   if (previewResumeBtn) {
-    previewResumeBtn.addEventListener("click", previewResumeOnTexlive);
+    previewResumeBtn.addEventListener("click", () => {
+      if (window.previewResumePdfInline) {
+        window.previewResumePdfInline();
+      } else {
+        console.error("previewResumePdfInline not available yet");
+      }
+    });
   }
-  
+
   if (copyLatexBtn) {
-    copyLatexBtn.addEventListener("click", copyLatexCode);
+    copyLatexBtn.addEventListener("click", () => {
+      if (window.copyLatexCode) {
+        window.copyLatexCode();
+      } else {
+        console.error("copyLatexCode not available yet");
+      }
+    });
+  }
+
+  if (downloadPdfBtn) {
+    downloadPdfBtn.addEventListener("click", () => {
+      if (window.downloadLatexPdf) {
+        window.downloadLatexPdf();
+      } else {
+        console.error("downloadLatexPdf not available yet");
+      }
+    });
   }
 
   if (fileDropZone) {
@@ -575,7 +587,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   initializeJobDescriptionListener();
 
-  switchInputMethod("file");
+  // Use last selected input method if available
+  switchInputMethod(currentInputMethod || "file");
 
   console.log("✨ Professional Resume Analyzer UI initialized successfully!");
 });
@@ -629,6 +642,28 @@ function updateGeneratorUI() {
   });
 }
 
+function validateGeneratorSelection() {
+  try {
+
+    updateGeneratorUI();
+
+    const hint = document.getElementById("generatorSelectionHint");
+    if (hint) {
+      const ids = [
+        "includeSummaryGen",
+        "includeVariantGen",
+        "includeCoverGen",
+        "includeLinkedInGen",
+        "includeLatexGen",
+      ];
+      const anySelected = ids.some((id) => document.getElementById(id)?.checked);
+      hint.classList.toggle("hidden", anySelected);
+    }
+  } catch (e) {
+    console.warn("validateGeneratorSelection fallback:", e);
+  }
+}
+
 function toggleJobDescriptionSection() {
   const isChecked = includeJDMatch?.checked || false;
 
@@ -673,6 +708,9 @@ function toggleJobDescriptionSection() {
 
 function switchInputMethod(method) {
   currentInputMethod = method;
+  try {
+    localStorage.setItem("currentInputMethod", method);
+  } catch (_) {}
 
   if (window.va) {
     window.va("track", "Input Method Changed", { method: method });
@@ -711,8 +749,8 @@ function handleFileSelect(event) {
     return;
   }
 
-  if (file.size > 5 * 1024 * 1024) {
-    showError("File size must be less than 5MB.");
+  if (file.size > 10 * 1024 * 1024) {
+    showError("File size must be less than 10MB.");
     return;
   }
 
@@ -821,14 +859,6 @@ function showError(message) {
 function showResults(data) {
   hideAllStates();
   resultsSection.classList.remove("hidden");
-
-  // Store analysis result and resume text globally for generateBestResume
-  window.lastAnalysisResult = data;
-  if (currentInputMethod === "text" && resumeText?.value) {
-    extractedResumeText = resumeText.value;
-  } else if (data.extracted_text) {
-    extractedResumeText = data.extracted_text;
-  }
 
   if (analyzeBtn) {
     analyzeBtn.disabled = false;
@@ -1198,7 +1228,10 @@ function displayGeneratedContent(data) {
         }
         
         ${
-          variantData.match_percentage
+          (variantData.match_percentage && (
+            (data && data.job_description_provided === true) ||
+            (typeof jobDescription !== 'undefined' && jobDescription && jobDescription.value && jobDescription.value.trim().length > 0)
+          ))
             ? `
           <div class="mb-6">
             <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Job Match Analysis</h4>
@@ -1325,62 +1358,22 @@ function displayGeneratedContent(data) {
     contentContainer.appendChild(linkedinDiv);
   }
 
-  if (data.latex_resume && data.latex_resume.latex_source) {
-    hasGeneratedContent = true;
-    const latexDiv = document.createElement("div");
-    latexDiv.className =
-      "glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft";
-
-    const latexData = data.latex_resume;
-
-    latexDiv.innerHTML = `
-      <div class="flex items-center mb-4">
-        <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-        </svg>
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">LaTeX Resume</h3>
-      </div>
-      <div class="p-6 bg-primary-50 dark:bg-dark-800 rounded-lg">
-        <div class="bg-white dark:bg-dark-700 rounded-lg p-4">
-          <pre class="text-xs text-gray-700 dark:text-gray-300 overflow-x-auto whitespace-pre-wrap">${escapeHtml(
-            latexData.latex_source
-          )}</pre>
-        </div>
-        
-        ${
-          latexData.template_used
-            ? `
-          <div class="mt-4">
-            <span class="text-sm text-gray-600 dark:text-gray-400">Template: ${latexData.template_used}</span>
-          </div>
-        `
-            : ""
-        }
-      </div>
-      <div class="flex gap-2 mt-4">
-        <button onclick="copyToClipboard('${escapeForOnclick(
-          latexData.latex_source
-        )}', this)" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-          Copy LaTeX
-        </button>
-        <button onclick="downloadLatexSource('${escapeForOnclick(
-          latexData.latex_source
-        )}', '${
-      latexData.template_used || "modern"
-    }')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-          Download .tex
-        </button>
-        <button onclick="compileLatexToPdf('${escapeForOnclick(
-          latexData.latex_source
-        )}')" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-          <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
-          Compile PDF
-        </button>
-      </div>
-    `;
-    contentContainer.appendChild(latexDiv);
+  // Store analysis context for Best Resume flow
+  try {
+    window.lastAnalysisResult = data;
+    // Prefer resume text returned from backend (works for file uploads too)
+    if (data && data.resume_source_text) {
+      window.lastAnalyzedResumeText = data.resume_source_text;
+      try { extractedResumeText = data.resume_source_text; } catch(_){}
+    } else {
+      const ta = document.getElementById("resumeText");
+      if (ta && ta.value) {
+        window.lastAnalyzedResumeText = ta.value;
+        try { extractedResumeText = ta.value; } catch(_){}
+      }
+    }
+  } catch (e) {
+    console.warn("Could not store analysis context:", e);
   }
 
   if (hasGeneratedContent && !contentContainer.classList.contains("block")) {
@@ -1972,7 +1965,6 @@ function initializeGeneratorCheckboxes() {
     const checkbox = document.getElementById(id);
     if (checkbox) {
       // Add event listener to both change and click events for better compatibility
-     
       checkbox.addEventListener("change", function () {
         console.log(`🔘 Checkbox ${id} changed to:`, this.checked);
         updateGeneratorUI();
@@ -2123,8 +2115,8 @@ function handleFileSelect(event) {
     return;
   }
 
-  if (file.size > 5 * 1024 * 1024) {
-    showError("File size must be less than 5MB.");
+  if (file.size > 10 * 1024 * 1024) {
+    showError("File size must be less than 10MB.");
     return;
   }
 
@@ -2233,14 +2225,6 @@ function showError(message) {
 function showResults(data) {
   hideAllStates();
   resultsSection.classList.remove("hidden");
-
-  // Store analysis result and resume text globally for generateBestResume
-  window.lastAnalysisResult = data;
-  if (currentInputMethod === "text" && resumeText?.value) {
-    extractedResumeText = resumeText.value;
-  } else if (data.extracted_text) {
-    extractedResumeText = data.extracted_text;
-  }
 
   if (analyzeBtn) {
     analyzeBtn.disabled = false;
@@ -2477,360 +2461,259 @@ function generateAdvancedInsights(advancedData) {
   }
 }
 
-function displayGeneratedContent(data) {
-  const contentContainer = document.getElementById("generatedContent");
-  if (!contentContainer) {
-    console.error("❌ generatedContent container not found!");
+// Global variable to store the generated LaTeX code and extracted resume text
+let generatedLatexCode = '';
+let extractedResumeText = '';
+
+// Generate Best Resume Function
+async function generateBestResume() {
+  const generateBestResumeBtn = document.getElementById("generateBestResumeBtn");
+  const bestResumeSection = document.getElementById("bestResumeSection");
+  const latexCodeDisplay = document.getElementById("latexCodeDisplay");
+  
+  if (!generateBestResumeBtn || !bestResumeSection || !latexCodeDisplay) {
+    console.error("Required elements not found");
     return;
   }
-  console.log("✅ generatedContent container found");
 
-  // Debug: Log the data structure to see what we're working with
-  console.log("📊 Full data object:", data);
-  console.log("📝 Resume summary data:", data.resume_summary);
-  console.log("🎯 Tailored resume data:", data.tailored_resume);
-  console.log("💌 Cover letter data:", data.cover_letter);
-  console.log("🔗 LinkedIn summary data:", data.linkedin_summary);
-  console.log("📄 LaTeX resume data:", data.latex_resume);
-
-  contentContainer.innerHTML = "";
-  let hasGeneratedContent = false;
-
-  function escapeHtml(text) {
-    if (!text || typeof text !== "string") return "";
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
+  // Get the current resume text
+  let currentResumeText = '';
+  if (currentInputMethod === "text" && resumeText?.value) {
+    currentResumeText = resumeText.value;
+  } else if (extractedResumeText) {
+    currentResumeText = extractedResumeText;
   }
 
-  function escapeForOnclick(text) {
-    if (!text || typeof text !== "string") return "";
-    return text.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, "\\n");
+  if (!currentResumeText.trim()) {
+    alert("Please provide resume text first by analyzing your resume.");
+    return;
   }
 
-  if (data.resume_summary && data.resume_summary.optimized_summary) {
-    console.log("✅ Resume summary check passed");
-    hasGeneratedContent = true;
-    const summaryDiv = document.createElement("div");
-    summaryDiv.className =
-      "glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft";
+  // Show loading state
+  generateBestResumeBtn.disabled = true;
+  generateBestResumeBtn.innerHTML = `
+    <svg class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+    Generating...
+  `;
 
-    const summaryData = data.resume_summary;
-
-    summaryDiv.innerHTML = `
-      <div class="flex items-center mb-4">
-        <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-        </svg>
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Professional Summary</h3>
-      </div>
-      <div class="p-6 bg-primary-50 dark:bg-dark-800 rounded-lg">
-        <p class="text-gray-700 dark:text-gray-300 text-lg leading-relaxed mb-4">${escapeHtml(
-          summaryData.optimized_summary
-        )}</p>
-        
-        ${
-          summaryData.keyword_density
-            ? `
-          <div class="mb-4">
-            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Keyword Density</h4>
-            <div class="flex items-center">
-              <span class="text-2xl font-bold text-primary-600 dark:text-primary-400">${summaryData.keyword_density}%</span>
-              <span class="text-gray-600 dark:text-gray-400 ml-2">Optimization Score</span>
-            </div>
-            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-2">
-              <div class="bg-primary-600 h-2 rounded-full" style="width: ${summaryData.keyword_density}%"></div>
-            </div>
-          </div>
-        `
-            : ""
-        }
-        
-        ${
-          summaryData.improvement_suggestions &&
-          summaryData.improvement_suggestions.length > 0
-            ? `
-          <div class="mb-4">
-            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Improvement Suggestions</h4>
-            <ul class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
-              ${summaryData.improvement_suggestions
-                .map((suggestion) => `<li>• ${escapeHtml(suggestion)}</li>`)
-                .join("")}
-            </ul>
-          </div>
-        `
-            : ""
-        }
-      </div>
-      <button onclick="copyToClipboard('${escapeForOnclick(
-        summaryData.optimized_summary
-      )}', this)" class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-        Copy Summary
-      </button>
-    `;
-    contentContainer.appendChild(summaryDiv);
-  } else {
-    console.log("❌ Resume summary check failed:", {
-      hasResumeSum: !!data.resume_summary,
-      hasOptSum: !!(data.resume_summary && data.resume_summary.optimized_summary),
-      structure: data.resume_summary
-    });
-  }
-
-  if (data.tailored_resume) {
-    console.log("✅ Tailored resume check passed");
-    hasGeneratedContent = true;
-    const variantDiv = document.createElement("div");
-    variantDiv.className =
-      "glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft";
-
-    const variantData = data.tailored_resume;
-
-    variantDiv.innerHTML = `
-      <div class="flex items-center mb-4">
-        <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
-        </svg>
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Tailored Resume Optimization</h3>
-      </div>
-      <div class="p-6 bg-primary-50 dark:bg-dark-800 rounded-lg">
-        ${
-          variantData.tailored_summary
-            ? `
-          <div class="mb-6">
-            <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Tailored Professional Summary</h4>
-            <div class="p-4 bg-white dark:bg-dark-700 rounded-lg border border-gray-200 dark:border-dark-600">
-              <p class="text-gray-700 dark:text-gray-300 leading-relaxed">${escapeHtml(
-                variantData.tailored_summary
-              )}</p>
-            </div>
-          </div>
-        `
-            : ""
-        }
-        
-        ${
-          variantData.match_percentage
-            ? `
-          <div class="mb-6">
-            <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Job Match Analysis</h4>
-            <div class="p-4 bg-white dark:bg-dark-700 rounded-lg border border-gray-200 dark:border-dark-600">
-              <div class="flex items-center mb-2">
-                <span class="text-2xl font-bold text-primary-600 dark:text-primary-400">${variantData.match_percentage}%</span>
-                <span class="text-gray-600 dark:text-gray-400 ml-2">Job Match Score</span>
-              </div>
-              <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                <div class="bg-primary-600 h-2 rounded-full" style="width: ${variantData.match_percentage}%"></div>
-              </div>
-            </div>
-          </div>
-        `
-            : ""
-        }
-      </div>
-      <button onclick="copyToClipboard('${escapeForOnclick(
-        variantData.tailored_summary || ""
-      )}', this)" class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-        Copy Optimization
-      </button>
-    `;
-    contentContainer.appendChild(variantDiv);
-  } else {
-    console.log("❌ Tailored resume check failed:", {
-      hasTailoredResume: !!data.tailored_resume,
-      structure: data.tailored_resume
-    });
-  }
-
-  if (data.cover_letter && data.cover_letter.full_letter) {
-    console.log("✅ Cover letter check passed");
-    hasGeneratedContent = true;
-    const coverDiv = document.createElement("div");
-    coverDiv.className =
-      "glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft";
-
-    const coverData = data.cover_letter;
-
-    coverDiv.innerHTML = `
-      <div class="flex items-center mb-4">
-        <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-        </svg>
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Cover Letter</h3>
-      </div>
-      <div class="p-6 bg-primary-50 dark:bg-dark-800 rounded-lg">
-        <div class="bg-white dark:bg-dark-700 rounded-lg p-6 whitespace-pre-line text-gray-700 dark:text-gray-300 leading-relaxed">
-          ${escapeHtml(coverData.full_letter)}
-        </div>
-        
-        ${
-          coverData.word_count
-            ? `
-          <div class="mt-4 flex items-center justify-between">
-            <span class="text-sm text-gray-600 dark:text-gray-400">Word Count: ${
-              coverData.word_count
-            }</span>
-            ${
-              coverData.personalization_score
-                ? `<span class="text-sm text-gray-600 dark:text-gray-400">Personalization: ${coverData.personalization_score}%</span>`
-                : ""
-            }
-          </div>
-        `
-            : ""
-        }
-      </div>
-      <button onclick="copyToClipboard('${escapeForOnclick(
-        coverData.full_letter
-      )}', this)" class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-        Copy Cover Letter
-      </button>
-    `;
-    contentContainer.appendChild(coverDiv);
-  }
-
-  if (data.linkedin_summary && data.linkedin_summary.linkedin_summary) {
-    hasGeneratedContent = true;
-    const linkedinDiv = document.createElement("div");
-    linkedinDiv.className =
-      "glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft";
-
-    const linkedinData = data.linkedin_summary;
-
-    linkedinDiv.innerHTML = `
-      <div class="flex items-center mb-4">
-        <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6"></path>
-        </svg>
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">LinkedIn Summary</h3>
-      </div>
-      <div class="p-6 bg-primary-50 dark:bg-dark-800 rounded-lg">
-        <div class="bg-white dark:bg-dark-700 rounded-lg p-6">
-          <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">${escapeHtml(
-            linkedinData.linkedin_summary
-          )}</p>
-        </div>
-        
-        ${
-          linkedinData.optimization_score
-            ? `
-          <div class="mt-4">
-            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Optimization Score</h4>
-            <div class="flex items-center">
-              <span class="text-2xl font-bold text-primary-600 dark:text-primary-400">${linkedinData.optimization_score}%</span>
-              <span class="text-gray-600 dark:text-gray-400 ml-2">Optimization Level</span>
-            </div>
-            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-2">
-              <div class="bg-primary-600 h-2 rounded-full" style="width: ${linkedinData.optimization_score}%"></div>
-            </div>
-          </div>
-        `
-            : ""
-        }
-      </div>
-      <button onclick="copyToClipboard('${escapeForOnclick(
-        linkedinData.linkedin_summary
-      )}', this)" class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-        Copy LinkedIn Summary
-      </button>
-    `;
-    contentContainer.appendChild(linkedinDiv);
-  }
-
-  if (data.latex_resume && data.latex_resume.latex_source) {
-    hasGeneratedContent = true;
-    const latexDiv = document.createElement("div");
-    latexDiv.className =
-      "glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft";
-
-    const latexData = data.latex_resume;
-
-    latexDiv.innerHTML = `
-      <div class="flex items-center mb-4">
-        <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-        </svg>
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">LaTeX Resume</h3>
-      </div>
-      <div class="p-6 bg-primary-50 dark:bg-dark-800 rounded-lg">
-        <div class="bg-white dark:bg-dark-700 rounded-lg p-4">
-          <pre class="text-xs text-gray-700 dark:text-gray-300 overflow-x-auto whitespace-pre-wrap">${escapeHtml(
-            latexData.latex_source
-          )}</pre>
-        </div>
-        
-        ${
-          latexData.template_used
-            ? `
-          <div class="mt-4">
-            <span class="text-sm text-gray-600 dark:text-gray-400">Template: ${latexData.template_used}</span>
-          </div>
-        `
-            : ""
-        }
-      </div>
-      <div class="flex gap-2 mt-4">
-        <button onclick="copyToClipboard('${escapeForOnclick(
-          latexData.latex_source
-        )}', this)" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-          Copy LaTeX
-        </button>
-        <button onclick="downloadLatexSource('${escapeForOnclick(
-          latexData.latex_source
-        )}', '${
-      latexData.template_used || "modern"
-    }')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-          Download .tex
-        </button>
-        <button onclick="compileLatexToPdf('${escapeForOnclick(
-          latexData.latex_source
-        )}')" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-          <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
-          Compile PDF
-        </button>
-      </div>
-    `;
-    contentContainer.appendChild(latexDiv);
-  }
-
-  if (hasGeneratedContent && !contentContainer.classList.contains("block")) {
-    console.log("🎉 Showing generated content container");
-    contentContainer.classList.remove("hidden");
-    contentContainer.classList.add("block");
-
-    setTimeout(() => {
-      contentContainer.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 100);
-  } else {
-    console.log("❌ Not showing container:", {
-      hasGeneratedContent,
-      hasBlockClass: contentContainer.classList.contains("block")
-    });
-  }
-}
-
-// Compile LaTeX to PDF via backend API
-async function compileLatexToPdf(latexCode, filename = "resume") {
   try {
-    const response = await fetch("/api/compile-latex-pdf", {
+    const response = await fetch("/api/generate-best-resume", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ latexCode, filename }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        resumeText: currentResumeText,
+        analysisData: window.lastAnalysisResult || null
+      }),
     });
 
     const result = await response.json();
-    if (!response.ok || !result.success) {
-      throw new Error(result.details || result.error || "PDF generation failed");
+
+    if (result.success) {
+      generatedLatexCode = result.latex_code;
+      try { window.lastBestPreviewUrl = result.preview_url; } catch(_){}
+      latexCodeDisplay.textContent = result.latex_code;
+      bestResumeSection.classList.remove("hidden");
+      bestResumeSection.scrollIntoView({ behavior: "smooth" });
+      
+      console.log("✅ Best resume generated successfully");
+
+      // Auto-preview inline after generation
+      setTimeout(() => {
+        previewResumePdfInline();
+      }, 100);
+    } else {
+      throw new Error(result.error || "Failed to generate resume");
     }
-
-    const { pdfBase64 } = result.data || {};
-    if (!pdfBase64) throw new Error("No PDF data returned");
-
-    downloadPDF(pdfBase64, `${filename}.pdf`);
-  } catch (err) {
-    console.error("compileLatexToPdf error:", err);
-    showError(`PDF generation failed: ${err.message}`);
+  } catch (error) {
+    console.error("Error generating best resume:", error);
+    alert("Failed to generate resume. Please try again.");
+  } finally {
+    // Reset button
+    generateBestResumeBtn.disabled = false;
+    generateBestResumeBtn.innerHTML = `
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+      </svg>
+      Generate Best Resume
+    `;
   }
 }
+
+// expose for early listeners
+try { window.generateBestResume = generateBestResume; } catch(_){}
+
+// Preview Resume on TeXlive.net
+async function previewResumePdfInline() {
+  if (!generatedLatexCode) {
+    alert("Please generate a resume first.");
+    return;
+  }
+
+  const btn = document.getElementById("previewResumeBtn");
+  const status = document.getElementById("pdfStatus");
+  const frame = document.getElementById("pdfPreviewFrame");
+  const placeholder = document.getElementById("pdfPlaceholder");
+
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `
+    <svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+    Rendering…
+  `;
+  if (status) status.textContent = "Compiling LaTeX to PDF…";
+
+  try {
+  // Ask backend to generate PDF via pure Node (no TeX Live) and return a PDF stream
+  const resp = await fetch('/api/generate-pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ latexCode: generatedLatexCode, filename: 'resume' })
+    });
+
+  if (!resp.ok) {
+      // Fallback: avoid very long GET URLs; show a short message instead
+      if (frame) {
+        frame.classList.add('hidden');
+      }
+      if (placeholder) {
+        placeholder.classList.remove('hidden');
+        placeholder.textContent = 'Inline compile failed. Click Download PDF or try again.';
+      }
+      if (status) status.textContent = "Preview unavailable; try Download PDF.";
+      return;
+    }
+  // Read PDF stream as blob and embed in iframe
+  const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+
+    if (frame) {
+      frame.src = url;
+      frame.classList.remove('hidden');
+    }
+    if (placeholder) {
+      placeholder.classList.add('hidden');
+    }
+    if (status) status.textContent = "Preview ready";
+  } catch (e) {
+    console.error('PDF preview error:', e);
+    if (frame) frame.classList.add('hidden');
+    if (placeholder) {
+      placeholder.classList.remove('hidden');
+      placeholder.textContent = 'Inline compile failed. Click Download PDF or try again.';
+    }
+  if (status) status.textContent = "Preview unavailable; try Download PDF.";
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
+  }
+}
+
+try { window.previewResumePdfInline = previewResumePdfInline; } catch(_){}
+
+// Copy LaTeX Code to Clipboard
+async function copyLatexCode() {
+  if (!generatedLatexCode) {
+    alert("Please generate a resume first.");
+    return;
+  }
+  
+  try {
+    await navigator.clipboard.writeText(generatedLatexCode);
+    
+    // Show success feedback
+    const copyBtn = document.getElementById("copyLatexBtn");
+    const originalText = copyBtn.innerHTML;
+    copyBtn.innerHTML = `
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+      Copied!
+    `;
+    
+    setTimeout(() => {
+      copyBtn.innerHTML = originalText;
+    }, 2000);
+    
+  } catch (error) {
+    console.error("Failed to copy:", error);
+    alert("Failed to copy to clipboard. Please select and copy manually.");
+  }
+}
+
+try { window.copyLatexCode = copyLatexCode; } catch(_){}
+
+// Download PDF using server endpoint
+async function downloadLatexPdf() {
+  if (!generatedLatexCode) {
+    alert("Please generate a resume first.");
+    return;
+  }
+  const btn = document.getElementById("downloadPdfBtn");
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `
+    <svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+    Preparing…
+  `;
+  try {
+    // Prefer accurate TeX compile for download
+    let ok = false;
+    try {
+      const texDl = await fetch('/api/download-latex-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ latexCode: generatedLatexCode, filename: 'resume' })
+      });
+      if (texDl.ok) {
+        const blob = await texDl.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'resume.pdf';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        ok = true;
+      }
+    } catch(_) {}
+
+    if (!ok) {
+      // Fallback to fast renderer
+      const resp = await fetch('/api/generate-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ latexCode: generatedLatexCode, filename: 'resume' })
+      });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'resume.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+  } catch (e) {
+    console.error('Download failed', e);
+    alert('Failed to download PDF. Try Preview first or retry.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+}
+
+try { window.downloadLatexPdf = downloadLatexPdf; } catch(_){ }

@@ -4,10 +4,10 @@ A comprehensive, AI-powered web application that analyzes resumes using Google's
 
 ## 🎉 Latest Features
 
-- **🌟 NEW: Generate Best Resume** - AI-powered clean LaTeX resume generation with TeXlive.net preview
+- **🌟 NEW: Generate Best Resume** - AI-powered clean LaTeX resume generation with server-side preview
 - **🚀 Single API Call Optimization** - All generators run in one combined API call (6 calls → 1 call)
 - **✅ Enhanced LaTeX Generation** - Professional ATS-friendly templates with instant preview
-- **📥 PDF Download** - Instant PDF generation via TeXlive.net online service
+- **📥 PDF Download** - Instant PDF generation via server (no TeX Live required)
 - **🔄 Background Processing** - LaTeX-to-PDF rendering without local dependencies
 - **⚠️ Improved Error Handling** - Graceful fallback and comprehensive error management
 - **🎨 Enhanced UI** - Modern glass morphism design with smooth animations
@@ -63,7 +63,7 @@ A comprehensive, AI-powered web application that analyzes resumes using Google's
 
 - **🤖 AI-Powered LaTeX Generation** - Creates clean, professional LaTeX code from scratch
 - **🎨 ATS-Friendly Templates** - Modern designs optimized for applicant tracking systems
-- **🔗 TeXlive.net Integration** - Instant preview and PDF compilation without local setup
+- **🔗 TeX-Less Server Option** - Instant preview and PDF generation via pure Node (no TeX Live)
 - **📋 One-Click Copy** - Copy LaTeX code to clipboard with visual confirmation
 - **📄 Professional Output** - Industry-standard resume formatting and structure
 - **⚡ Fast Generation** - Complete LaTeX resume in seconds
@@ -157,9 +157,13 @@ A comprehensive, AI-powered web application that analyzes resumes using Google's
 1. Complete resume analysis first
 2. Click "Generate Best Resume" button
 3. Wait for AI to generate professional LaTeX code
-4. Preview instantly on TeXlive.net
+4. Preview inline (server-side compile)
 5. Copy LaTeX code for further editing
-6. Download PDF directly from preview
+6. Download PDF directly from the server
+
+Optional: TeX-Less PDF (no TeX Live)
+- POST /api/generate-pdf with JSON { "latexCode": "..." }
+- Streams a PDF generated with Node (latex.js + pdfkit)
 
 ### 3. **Content Generation**
 - Enable specific generators during analysis

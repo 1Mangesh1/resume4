@@ -5,6 +5,7 @@ const resumeController = require("../controllers/resumeController");
 const streamController = require("../controllers/streamController");
 const historyController = require("../controllers/historyController");
 const latexController = require("../controllers/latexController");
+const localPdfController = require("../controllers/localPdfController");
 const upload = require("../config/multer");
 
 // Main routes
@@ -31,5 +32,8 @@ router.post("/api/generate-best-resume", resumeController.generateBestResume);
 router.get("/api/latex-templates", latexController.getLatexTemplates);
 router.post("/api/compile-latex-pdf", latexController.compileLatexPdf);
 router.post("/api/download-latex-pdf", latexController.downloadLatexPdf);
+
+// Pure Node.js LaTeX->PDF (no TeX Live) endpoint
+router.post("/api/generate-pdf", localPdfController.generatePdf);
 
 module.exports = router;
