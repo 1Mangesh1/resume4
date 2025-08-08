@@ -711,8 +711,8 @@ function handleFileSelect(event) {
     return;
   }
 
-  if (file.size > 10 * 1024 * 1024) {
-    showError("File size must be less than 10MB.");
+  if (file.size > 5 * 1024 * 1024) {
+    showError("File size must be less than 5MB.");
     return;
   }
 
@@ -821,6 +821,14 @@ function showError(message) {
 function showResults(data) {
   hideAllStates();
   resultsSection.classList.remove("hidden");
+
+  // Store analysis result and resume text globally for generateBestResume
+  window.lastAnalysisResult = data;
+  if (currentInputMethod === "text" && resumeText?.value) {
+    extractedResumeText = resumeText.value;
+  } else if (data.extracted_text) {
+    extractedResumeText = data.extracted_text;
+  }
 
   if (analyzeBtn) {
     analyzeBtn.disabled = false;
@@ -1964,6 +1972,7 @@ function initializeGeneratorCheckboxes() {
     const checkbox = document.getElementById(id);
     if (checkbox) {
       // Add event listener to both change and click events for better compatibility
+     
       checkbox.addEventListener("change", function () {
         console.log(`🔘 Checkbox ${id} changed to:`, this.checked);
         updateGeneratorUI();
@@ -2114,8 +2123,8 @@ function handleFileSelect(event) {
     return;
   }
 
-  if (file.size > 10 * 1024 * 1024) {
-    showError("File size must be less than 10MB.");
+  if (file.size > 5 * 1024 * 1024) {
+    showError("File size must be less than 5MB.");
     return;
   }
 
@@ -2224,6 +2233,14 @@ function showError(message) {
 function showResults(data) {
   hideAllStates();
   resultsSection.classList.remove("hidden");
+
+  // Store analysis result and resume text globally for generateBestResume
+  window.lastAnalysisResult = data;
+  if (currentInputMethod === "text" && resumeText?.value) {
+    extractedResumeText = resumeText.value;
+  } else if (data.extracted_text) {
+    extractedResumeText = data.extracted_text;
+  }
 
   if (analyzeBtn) {
     analyzeBtn.disabled = false;
@@ -2460,120 +2477,360 @@ function generateAdvancedInsights(advancedData) {
   }
 }
 
-// Global variable to store the generated LaTeX code and extracted resume text
-let generatedLatexCode = '';
-let extractedResumeText = '';
-
-// Generate Best Resume Function
-async function generateBestResume() {
-  const generateBestResumeBtn = document.getElementById("generateBestResumeBtn");
-  const bestResumeSection = document.getElementById("bestResumeSection");
-  const latexCodeDisplay = document.getElementById("latexCodeDisplay");
-  
-  if (!generateBestResumeBtn || !bestResumeSection || !latexCodeDisplay) {
-    console.error("Required elements not found");
+function displayGeneratedContent(data) {
+  const contentContainer = document.getElementById("generatedContent");
+  if (!contentContainer) {
+    console.error("❌ generatedContent container not found!");
     return;
   }
+  console.log("✅ generatedContent container found");
 
-  // Get the current resume text
-  let currentResumeText = '';
-  if (currentInputMethod === "text" && resumeText?.value) {
-    currentResumeText = resumeText.value;
-  } else if (extractedResumeText) {
-    currentResumeText = extractedResumeText;
+  // Debug: Log the data structure to see what we're working with
+  console.log("📊 Full data object:", data);
+  console.log("📝 Resume summary data:", data.resume_summary);
+  console.log("🎯 Tailored resume data:", data.tailored_resume);
+  console.log("💌 Cover letter data:", data.cover_letter);
+  console.log("🔗 LinkedIn summary data:", data.linkedin_summary);
+  console.log("📄 LaTeX resume data:", data.latex_resume);
+
+  contentContainer.innerHTML = "";
+  let hasGeneratedContent = false;
+
+  function escapeHtml(text) {
+    if (!text || typeof text !== "string") return "";
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
   }
 
-  if (!currentResumeText.trim()) {
-    alert("Please provide resume text first by analyzing your resume.");
-    return;
+  function escapeForOnclick(text) {
+    if (!text || typeof text !== "string") return "";
+    return text.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, "\\n");
   }
 
-  // Show loading state
-  generateBestResumeBtn.disabled = true;
-  generateBestResumeBtn.innerHTML = `
-    <svg class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24">
-      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-    </svg>
-    Generating...
-  `;
+  if (data.resume_summary && data.resume_summary.optimized_summary) {
+    console.log("✅ Resume summary check passed");
+    hasGeneratedContent = true;
+    const summaryDiv = document.createElement("div");
+    summaryDiv.className =
+      "glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft";
 
+    const summaryData = data.resume_summary;
+
+    summaryDiv.innerHTML = `
+      <div class="flex items-center mb-4">
+        <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+        </svg>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Professional Summary</h3>
+      </div>
+      <div class="p-6 bg-primary-50 dark:bg-dark-800 rounded-lg">
+        <p class="text-gray-700 dark:text-gray-300 text-lg leading-relaxed mb-4">${escapeHtml(
+          summaryData.optimized_summary
+        )}</p>
+        
+        ${
+          summaryData.keyword_density
+            ? `
+          <div class="mb-4">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Keyword Density</h4>
+            <div class="flex items-center">
+              <span class="text-2xl font-bold text-primary-600 dark:text-primary-400">${summaryData.keyword_density}%</span>
+              <span class="text-gray-600 dark:text-gray-400 ml-2">Optimization Score</span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-2">
+              <div class="bg-primary-600 h-2 rounded-full" style="width: ${summaryData.keyword_density}%"></div>
+            </div>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          summaryData.improvement_suggestions &&
+          summaryData.improvement_suggestions.length > 0
+            ? `
+          <div class="mb-4">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Improvement Suggestions</h4>
+            <ul class="text-gray-600 dark:text-gray-400 text-sm space-y-1">
+              ${summaryData.improvement_suggestions
+                .map((suggestion) => `<li>• ${escapeHtml(suggestion)}</li>`)
+                .join("")}
+            </ul>
+          </div>
+        `
+            : ""
+        }
+      </div>
+      <button onclick="copyToClipboard('${escapeForOnclick(
+        summaryData.optimized_summary
+      )}', this)" class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+        Copy Summary
+      </button>
+    `;
+    contentContainer.appendChild(summaryDiv);
+  } else {
+    console.log("❌ Resume summary check failed:", {
+      hasResumeSum: !!data.resume_summary,
+      hasOptSum: !!(data.resume_summary && data.resume_summary.optimized_summary),
+      structure: data.resume_summary
+    });
+  }
+
+  if (data.tailored_resume) {
+    console.log("✅ Tailored resume check passed");
+    hasGeneratedContent = true;
+    const variantDiv = document.createElement("div");
+    variantDiv.className =
+      "glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft";
+
+    const variantData = data.tailored_resume;
+
+    variantDiv.innerHTML = `
+      <div class="flex items-center mb-4">
+        <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
+        </svg>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Tailored Resume Optimization</h3>
+      </div>
+      <div class="p-6 bg-primary-50 dark:bg-dark-800 rounded-lg">
+        ${
+          variantData.tailored_summary
+            ? `
+          <div class="mb-6">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Tailored Professional Summary</h4>
+            <div class="p-4 bg-white dark:bg-dark-700 rounded-lg border border-gray-200 dark:border-dark-600">
+              <p class="text-gray-700 dark:text-gray-300 leading-relaxed">${escapeHtml(
+                variantData.tailored_summary
+              )}</p>
+            </div>
+          </div>
+        `
+            : ""
+        }
+        
+        ${
+          variantData.match_percentage
+            ? `
+          <div class="mb-6">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Job Match Analysis</h4>
+            <div class="p-4 bg-white dark:bg-dark-700 rounded-lg border border-gray-200 dark:border-dark-600">
+              <div class="flex items-center mb-2">
+                <span class="text-2xl font-bold text-primary-600 dark:text-primary-400">${variantData.match_percentage}%</span>
+                <span class="text-gray-600 dark:text-gray-400 ml-2">Job Match Score</span>
+              </div>
+              <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                <div class="bg-primary-600 h-2 rounded-full" style="width: ${variantData.match_percentage}%"></div>
+              </div>
+            </div>
+          </div>
+        `
+            : ""
+        }
+      </div>
+      <button onclick="copyToClipboard('${escapeForOnclick(
+        variantData.tailored_summary || ""
+      )}', this)" class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+        Copy Optimization
+      </button>
+    `;
+    contentContainer.appendChild(variantDiv);
+  } else {
+    console.log("❌ Tailored resume check failed:", {
+      hasTailoredResume: !!data.tailored_resume,
+      structure: data.tailored_resume
+    });
+  }
+
+  if (data.cover_letter && data.cover_letter.full_letter) {
+    console.log("✅ Cover letter check passed");
+    hasGeneratedContent = true;
+    const coverDiv = document.createElement("div");
+    coverDiv.className =
+      "glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft";
+
+    const coverData = data.cover_letter;
+
+    coverDiv.innerHTML = `
+      <div class="flex items-center mb-4">
+        <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+        </svg>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Cover Letter</h3>
+      </div>
+      <div class="p-6 bg-primary-50 dark:bg-dark-800 rounded-lg">
+        <div class="bg-white dark:bg-dark-700 rounded-lg p-6 whitespace-pre-line text-gray-700 dark:text-gray-300 leading-relaxed">
+          ${escapeHtml(coverData.full_letter)}
+        </div>
+        
+        ${
+          coverData.word_count
+            ? `
+          <div class="mt-4 flex items-center justify-between">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Word Count: ${
+              coverData.word_count
+            }</span>
+            ${
+              coverData.personalization_score
+                ? `<span class="text-sm text-gray-600 dark:text-gray-400">Personalization: ${coverData.personalization_score}%</span>`
+                : ""
+            }
+          </div>
+        `
+            : ""
+        }
+      </div>
+      <button onclick="copyToClipboard('${escapeForOnclick(
+        coverData.full_letter
+      )}', this)" class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+        Copy Cover Letter
+      </button>
+    `;
+    contentContainer.appendChild(coverDiv);
+  }
+
+  if (data.linkedin_summary && data.linkedin_summary.linkedin_summary) {
+    hasGeneratedContent = true;
+    const linkedinDiv = document.createElement("div");
+    linkedinDiv.className =
+      "glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft";
+
+    const linkedinData = data.linkedin_summary;
+
+    linkedinDiv.innerHTML = `
+      <div class="flex items-center mb-4">
+        <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6"></path>
+        </svg>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">LinkedIn Summary</h3>
+      </div>
+      <div class="p-6 bg-primary-50 dark:bg-dark-800 rounded-lg">
+        <div class="bg-white dark:bg-dark-700 rounded-lg p-6">
+          <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">${escapeHtml(
+            linkedinData.linkedin_summary
+          )}</p>
+        </div>
+        
+        ${
+          linkedinData.optimization_score
+            ? `
+          <div class="mt-4">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Optimization Score</h4>
+            <div class="flex items-center">
+              <span class="text-2xl font-bold text-primary-600 dark:text-primary-400">${linkedinData.optimization_score}%</span>
+              <span class="text-gray-600 dark:text-gray-400 ml-2">Optimization Level</span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-2">
+              <div class="bg-primary-600 h-2 rounded-full" style="width: ${linkedinData.optimization_score}%"></div>
+            </div>
+          </div>
+        `
+            : ""
+        }
+      </div>
+      <button onclick="copyToClipboard('${escapeForOnclick(
+        linkedinData.linkedin_summary
+      )}', this)" class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+        Copy LinkedIn Summary
+      </button>
+    `;
+    contentContainer.appendChild(linkedinDiv);
+  }
+
+  if (data.latex_resume && data.latex_resume.latex_source) {
+    hasGeneratedContent = true;
+    const latexDiv = document.createElement("div");
+    latexDiv.className =
+      "glass-card rounded-3xl p-8 shadow-soft-lg dark:shadow-dark-soft";
+
+    const latexData = data.latex_resume;
+
+    latexDiv.innerHTML = `
+      <div class="flex items-center mb-4">
+        <svg class="w-6 h-6 text-primary-600 dark:text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">LaTeX Resume</h3>
+      </div>
+      <div class="p-6 bg-primary-50 dark:bg-dark-800 rounded-lg">
+        <div class="bg-white dark:bg-dark-700 rounded-lg p-4">
+          <pre class="text-xs text-gray-700 dark:text-gray-300 overflow-x-auto whitespace-pre-wrap">${escapeHtml(
+            latexData.latex_source
+          )}</pre>
+        </div>
+        
+        ${
+          latexData.template_used
+            ? `
+          <div class="mt-4">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Template: ${latexData.template_used}</span>
+          </div>
+        `
+            : ""
+        }
+      </div>
+      <div class="flex gap-2 mt-4">
+        <button onclick="copyToClipboard('${escapeForOnclick(
+          latexData.latex_source
+        )}', this)" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+          Copy LaTeX
+        </button>
+        <button onclick="downloadLatexSource('${escapeForOnclick(
+          latexData.latex_source
+        )}', '${
+      latexData.template_used || "modern"
+    }')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+          Download .tex
+        </button>
+        <button onclick="compileLatexToPdf('${escapeForOnclick(
+          latexData.latex_source
+        )}')" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+          <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          Compile PDF
+        </button>
+      </div>
+    `;
+    contentContainer.appendChild(latexDiv);
+  }
+
+  if (hasGeneratedContent && !contentContainer.classList.contains("block")) {
+    console.log("🎉 Showing generated content container");
+    contentContainer.classList.remove("hidden");
+    contentContainer.classList.add("block");
+
+    setTimeout(() => {
+      contentContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  } else {
+    console.log("❌ Not showing container:", {
+      hasGeneratedContent,
+      hasBlockClass: contentContainer.classList.contains("block")
+    });
+  }
+}
+
+// Compile LaTeX to PDF via backend API
+async function compileLatexToPdf(latexCode, filename = "resume") {
   try {
-    const response = await fetch("/api/generate-best-resume", {
+    const response = await fetch("/api/compile-latex-pdf", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        resumeText: currentResumeText,
-        analysisData: window.lastAnalysisResult || null
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ latexCode, filename }),
     });
 
     const result = await response.json();
-
-    if (result.success) {
-      generatedLatexCode = result.latex_code;
-      latexCodeDisplay.textContent = result.latex_code;
-      bestResumeSection.classList.remove("hidden");
-      bestResumeSection.scrollIntoView({ behavior: "smooth" });
-      
-      console.log("✅ Best resume generated successfully");
-    } else {
-      throw new Error(result.error || "Failed to generate resume");
+    if (!response.ok || !result.success) {
+      throw new Error(result.details || result.error || "PDF generation failed");
     }
-  } catch (error) {
-    console.error("Error generating best resume:", error);
-    alert("Failed to generate resume. Please try again.");
-  } finally {
-    // Reset button
-    generateBestResumeBtn.disabled = false;
-    generateBestResumeBtn.innerHTML = `
-      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-      </svg>
-      Generate Best Resume
-    `;
-  }
-}
 
-// Preview Resume on TeXlive.net
-function previewResumeOnTexlive() {
-  if (!generatedLatexCode) {
-    alert("Please generate a resume first.");
-    return;
-  }
-  
-  const previewUrl = `https://texlive.net/run?code=${encodeURIComponent(generatedLatexCode)}`;
-  window.open(previewUrl, '_blank');
-}
+    const { pdfBase64 } = result.data || {};
+    if (!pdfBase64) throw new Error("No PDF data returned");
 
-// Copy LaTeX Code to Clipboard
-async function copyLatexCode() {
-  if (!generatedLatexCode) {
-    alert("Please generate a resume first.");
-    return;
-  }
-  
-  try {
-    await navigator.clipboard.writeText(generatedLatexCode);
-    
-    // Show success feedback
-    const copyBtn = document.getElementById("copyLatexBtn");
-    const originalText = copyBtn.innerHTML;
-    copyBtn.innerHTML = `
-      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-      </svg>
-      Copied!
-    `;
-    
-    setTimeout(() => {
-      copyBtn.innerHTML = originalText;
-    }, 2000);
-    
-  } catch (error) {
-    console.error("Failed to copy:", error);
-    alert("Failed to copy to clipboard. Please select and copy manually.");
+    downloadPDF(pdfBase64, `${filename}.pdf`);
+  } catch (err) {
+    console.error("compileLatexToPdf error:", err);
+    showError(`PDF generation failed: ${err.message}`);
   }
 }

@@ -4,8 +4,8 @@ const path = require("path");
 const validateEnvironment = () => {
   const issues = [];
 
-  if (!process.env.GEMINI_API_KEY) {
-    issues.push("GEMINI_API_KEY environment variable is not set");
+  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+    issues.push("GOOGLE_GENERATIVE_AI_API_KEY environment variable is not set");
   }
 
   // Check if uploads directory exists and is writable

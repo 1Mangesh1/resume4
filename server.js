@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const rateLimit = require("express-rate-limit");
 
 const { validateEnvironment } = require("./config/env");
 const { ensureUploadsDir } = require("./utils/file");
@@ -36,6 +37,20 @@ app.use(express.json({ limit: "5mb" }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(cors());
 
+// Basic rate limiting (60 req/min per IP)
+app.use(
+  rateLimit({
+    windowMs: 60 * 1000,
+    max: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+      success: false,
+      error: "Too many requests, please try again later.",
+    },
+  })
+);
+
 // Routes
 app.use("/", routes);
 
@@ -51,7 +66,7 @@ app.listen(PORT, () => {
   );
   console.log(
     `🤖 Gemini API: ${
-      process.env.GEMINI_API_KEY ? "✅ Configured" : "❌ Not configured"
+      process.env.GOOGLE_GENERATIVE_AI_API_KEY ? "✅ Configured" : "❌ Not configured"
     }`
   );
   console.log(`📄 LaTeX Generator: Ready for professional resume compilation`);

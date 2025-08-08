@@ -114,7 +114,7 @@ class LatexController {
       // Compile to PDF
       const result = await this.texliveService.compileToPDF(latexCode, filename);
 
-      if (result.success) {
+    if (result.success) {
         // Convert to base64 for JSON response
         const base64Pdf = result.pdfBuffer.toString('base64');
         
@@ -133,8 +133,9 @@ class LatexController {
         console.error("❌ PDF compilation failed:", result.error);
         res.status(400).json({
           success: false,
-          error: "PDF compilation failed",
-          details: result.error
+      error: "PDF compilation failed",
+      details: result.error,
+      rawError: result.rawError || undefined
         });
       }
 

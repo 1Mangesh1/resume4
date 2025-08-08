@@ -56,17 +56,17 @@ const analyzeResume = async (req, res) => {
       includeJDMatch: req.body.includeJDMatch === "true" || req.body.includeJDMatch === true,
     };
 
+    // Inline LaTeX generation is disabled; use the dedicated "Generate Best Resume" flow instead
     const generatorOptions = {
-      includeSummaryGen: req.body.includeSummaryGen === "true" || req.body.includeSummaryGen === true || 
-                        (req.body.generatorOptions && req.body.generatorOptions.includeSummaryGen),
-      includeVariantGen: req.body.includeVariantGen === "true" || req.body.includeVariantGen === true || 
-                        (req.body.generatorOptions && req.body.generatorOptions.includeVariantGen),
-      includeCoverGen: req.body.includeCoverGen === "true" || req.body.includeCoverGen === true || 
-                      (req.body.generatorOptions && req.body.generatorOptions.includeCoverGen),
-      includeLinkedInGen: req.body.includeLinkedInGen === "true" || req.body.includeLinkedInGen === true || 
-                         (req.body.generatorOptions && req.body.generatorOptions.includeLinkedInGen),
-      includeLatexGen: req.body.includeLatexGen === "true" || req.body.includeLatexGen === true || 
-                      (req.body.generatorOptions && req.body.generatorOptions.includeLatexGen),
+      includeSummaryGen: req.body.includeSummaryGen === "true" || req.body.includeSummaryGen === true ||
+        (req.body.generatorOptions && req.body.generatorOptions.includeSummaryGen),
+      includeVariantGen: req.body.includeVariantGen === "true" || req.body.includeVariantGen === true ||
+        (req.body.generatorOptions && req.body.generatorOptions.includeVariantGen),
+      includeCoverGen: req.body.includeCoverGen === "true" || req.body.includeCoverGen === true ||
+        (req.body.generatorOptions && req.body.generatorOptions.includeCoverGen),
+      includeLinkedInGen: req.body.includeLinkedInGen === "true" || req.body.includeLinkedInGen === true ||
+        (req.body.generatorOptions && req.body.generatorOptions.includeLinkedInGen),
+      includeLatexGen: false,
     };
 
     console.log("🔍 Request body generatorOptions:", req.body.generatorOptions);
@@ -74,7 +74,7 @@ const analyzeResume = async (req, res) => {
 
     const jobDescription = req.body.jobDescription || null;
 
-    let analysisResponse;
+  let analysisResponse;
     try {
       analysisResponse = await aiService.analyzeResume(
         sanitizedResumeText,
@@ -117,6 +117,12 @@ const analyzeResume = async (req, res) => {
         ],
       });
     }
+
+    // Enrich response with the exact resume text used (for client-side follow-ups)
+    try {
+      analysisResponse.resume_source_text = sanitizedResumeText;
+      analysisResponse.job_description_provided = !!jobDescription;
+    } catch (_) {}
 
     res.json(analysisResponse);
   } catch (error) {

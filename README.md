@@ -1,18 +1,18 @@
 # 🚀 AI Resume Analyzer - Complete Edition
 
-A comprehensive, AI-powered web application that analyzes resumes using Google's Gemini AI and provides detailed feedback with advanced job matching capabilities and content generation tools.
+A comprehensive, AI-powered web application that analyzes resumes using Google's Gemini AI and provides detailed feedback with advanced job matching capabilities, content generation tools, and professional LaTeX resume generation.
 
-## 🎉 Recent Updates
+## 🎉 Latest Features
 
-- **🚀 Single API Call Optimization** - All generators now run in one combined API call (6 calls → 1 call)
-- **✅ Fixed Copy LaTeX Button** - Enhanced clipboard functionality with fallback support
-- **📥 Added PDF Download** - Instant PDF generation via TeXlive.net online service
+- **🌟 NEW: Generate Best Resume** - AI-powered clean LaTeX resume generation with TeXlive.net preview
+- **🚀 Single API Call Optimization** - All generators run in one combined API call (6 calls → 1 call)
+- **✅ Enhanced LaTeX Generation** - Professional ATS-friendly templates with instant preview
+- **📥 PDF Download** - Instant PDF generation via TeXlive.net online service
 - **🔄 Background Processing** - LaTeX-to-PDF rendering without local dependencies
-- **⚠️ Improved Error Handling** - Graceful fallback to Overleaf.com when needed
-- **🎨 Enhanced UI** - Better button styling and user feedback with toast notifications
+- **⚠️ Improved Error Handling** - Graceful fallback and comprehensive error management
+- **🎨 Enhanced UI** - Modern glass morphism design with smooth animations
 - **🔧 Enhanced JSON Parsing** - Better handling of Gemini API responses
-- **🛡️ Improved Security** - Better input validation and error handling
-- **📊 Better Error Messages** - More helpful error messages with suggestions
+- **🛡️ Advanced Security** - Input sanitization and prompt injection protection
 
 ## ✨ Complete Feature Set
 
@@ -25,7 +25,7 @@ A comprehensive, AI-powered web application that analyzes resumes using Google's
 
 ### 🎯 **Core Analysis Engine**
 
-- **🤖 AI-Powered Feedback** - Powered by Google Gemini 1.5 Flash
+- **🤖 AI-Powered Feedback** - Powered by Google Gemini 2.0 Flash
 - **📊 4 Core Metrics** - Comprehensive scoring system (0-100):
   - **📝 Clarity** - Readability, structure, and communication effectiveness
   - **💥 Impact** - Quantified achievements and results-oriented content
@@ -34,7 +34,7 @@ A comprehensive, AI-powered web application that analyzes resumes using Google's
 - **⚡ Instant Results** - Get comprehensive feedback in under 10 seconds
 - **🔧 Configurable Analysis** - Choose specific metrics to focus on
 
-### 🎯 **Advanced Analysis Features**
+### 🔍 **Advanced Analysis Features**
 
 - **🎭 Tone Evaluation** - Assessment of professional voice and consistency
 - **🔸 Bullet Point Analysis** - Action verb usage and quantification scoring
@@ -57,26 +57,39 @@ A comprehensive, AI-powered web application that analyzes resumes using Google's
 - **🎯 Tailored Resume Generator** - Job-specific resume variants with ATS optimization
 - **💌 Cover Letter Generator** - Personalized cover letters with strategic positioning
 - **🔗 LinkedIn Summary Optimizer** - Optimized LinkedIn "About" sections with keyword density analysis
-- **📄 LaTeX Resume Generator** - Generate professional LaTeX resumes with instant PDF download
+- **📄 LaTeX Resume Generator** - Generate professional LaTeX resumes with instant PDF compilation
+
+### 🌟 **Generate Best Resume Feature**
+
+- **🤖 AI-Powered LaTeX Generation** - Creates clean, professional LaTeX code from scratch
+- **🎨 ATS-Friendly Templates** - Modern designs optimized for applicant tracking systems
+- **🔗 TeXlive.net Integration** - Instant preview and PDF compilation without local setup
+- **📋 One-Click Copy** - Copy LaTeX code to clipboard with visual confirmation
+- **📄 Professional Output** - Industry-standard resume formatting and structure
+- **⚡ Fast Generation** - Complete LaTeX resume in seconds
+- **🔄 Analysis Integration** - Uses existing resume analysis for enhanced output
 
 ### 🎨 **Modern UI/UX**
 
 - **🌓 Dark/Light Theme** - Automatic theme detection with manual toggle
-- **📱 Responsive Design** - Perfect experience on all devices
-- **💫 Glass Morphism** - Modern glass-effect design elements
+- **📱 Responsive Design** - Perfect experience on all devices (mobile, tablet, desktop)
+- **💫 Glass Morphism** - Modern glass-effect design elements with blur effects
 - **🎯 Tab-Based Interface** - Intuitive navigation between features
-- **📊 Visual Progress Bars** - Clear score visualization with animations
+- **📊 Visual Progress Bars** - Clear score visualization with smooth animations
 - **📋 Copy-to-Clipboard** - Easy content copying with visual feedback
-- **💡 Pro Tips** - Contextual help and guidance
+- **💡 Pro Tips** - Contextual help and guidance throughout the app
 - **🔄 Smooth Animations** - Polished transitions and micro-interactions
+- **🎭 Loading States** - Animated spinners and progress indicators
+- **🎨 Tailwind CSS** - Utility-first styling for consistent design
 
 ### 🛡️ **Security & Privacy**
 
-- **🔒 Input Sanitization** - Advanced protection against prompt injection
+- **🔒 Input Sanitization** - Advanced protection against prompt injection attacks
 - **📋 Delimited Processing** - Secure text processing with clear boundaries
 - **✅ File Validation** - Strict file type and size checking
 - **🗑️ Automatic Cleanup** - Temporary files removed after processing
 - **🛡️ Error Handling** - Comprehensive error management and user feedback
+- **🔐 API Security** - Safe handling of API keys and sensitive data
 
 ## 🚀 Quick Start
 
@@ -109,7 +122,7 @@ A comprehensive, AI-powered web application that analyzes resumes using Google's
    cp .env.example .env
 
    # Edit the file and add your API key
-   GEMINI_API_KEY=your_actual_api_key_here
+   GOOGLE_GENERATIVE_AI_API_KEY=your_actual_api_key_here
    ```
 
 4. **Get your Gemini API key**:
@@ -122,36 +135,87 @@ A comprehensive, AI-powered web application that analyzes resumes using Google's
 
    ```bash
    npm start
+   # or
+   node server.js
    ```
 
 6. **Open your browser**:
 
    Navigate to `http://localhost:3000`
 
+## 🎯 How to Use
+
+### 1. **Resume Analysis**
+1. Choose input method (text or file upload)
+2. Paste resume text or upload PDF/DOCX file
+3. Optionally add job description for targeted analysis
+4. Select analysis features you want
+5. Click "Analyze Resume"
+6. Review detailed scores and feedback
+
+### 2. **Generate Best Resume**
+1. Complete resume analysis first
+2. Click "Generate Best Resume" button
+3. Wait for AI to generate professional LaTeX code
+4. Preview instantly on TeXlive.net
+5. Copy LaTeX code for further editing
+6. Download PDF directly from preview
+
+### 3. **Content Generation**
+- Enable specific generators during analysis
+- Get AI-generated summaries, cover letters, and LinkedIn content
+- Copy generated content for immediate use
+
+## 🔧 Technical Stack
+
+### Backend
+- **Node.js** - Runtime environment
+- **Express.js** - Web framework
+- **Multer** - File upload handling
+- **Google AI SDK** - Gemini API integration
+- **PDF-Parse** - PDF text extraction
+- **Mammoth** - DOCX text extraction
+
+### Frontend
+- **Vanilla JavaScript** - Client-side functionality
+- **Tailwind CSS** - Utility-first styling
+- **HTML5** - Modern semantic markup
+- **CSS3** - Advanced styling and animations
+
+### AI & Processing
+- **Google Gemini 2.0 Flash** - Advanced language model
+- **Structured Prompts** - Optimized prompt engineering
+- **Token Management** - Efficient API usage
+- **Error Recovery** - Robust error handling
+
 ## 🔧 Troubleshooting
 
 ### Common Issues
 
 **❌ "API not configured" error**
-
-- Make sure you have set the `GEMINI_API_KEY` environment variable
+- Make sure you have set the `GOOGLE_GENERATIVE_AI_API_KEY` environment variable
 - Check that your API key is valid and has quota remaining
+- Restart the server after setting the environment variable
 
 **❌ "LaTeX compilation failed" error**
-
-- This is expected if LaTeX is not installed locally
-- Use the "Download .tex" option and compile with online services like Overleaf.com
+- Try the "Generate Best Resume" feature for better LaTeX output
+- Use TeXlive.net preview for instant PDF generation
+- Check LaTeX syntax if editing manually
 
 **❌ "File upload failed" error**
-
 - Check file size (max 5MB)
 - Ensure file is PDF, DOCX, or TXT format
 - Try refreshing the page and uploading again
 
-**❌ "JSON parsing error"**
+**❌ "Generate Best Resume not working"**
+- Ensure you've completed resume analysis first
+- Check browser console for JavaScript errors
+- Verify server is running and API is responding
 
-- This has been fixed with enhanced JSON parsing
-- If you still see this, try refreshing the page
+**❌ "Preview not opening"**
+- Check if popup blockers are enabled
+- Try copying LaTeX code and opening TeXlive.net manually
+- Ensure internet connection for external preview
 
 ### Development Setup
 
@@ -162,7 +226,7 @@ For development with enhanced logging:
 export NODE_ENV=development
 
 # Start with debug logging
-npm start
+npm run dev
 ```
 
 ### Production Deployment
@@ -177,13 +241,35 @@ export NODE_ENV=production
 npm start
 ```
 
-## 📊 API Usage
+## 📊 API Usage & Limits
 
-The application uses Google's Gemini API with the following limits:
+The application uses Google's Gemini API with the following considerations:
 
-- **Free tier**: 50 requests per day
+- **Free tier**: 15 requests per minute, 1500 requests per day
 - **Rate limiting**: Automatic handling with user-friendly messages
+- **Token limits**: Optimized prompts for efficient usage
 - **Fallback mode**: Demo mode available when quota is exceeded
+
+## 🌟 Advanced Features
+
+### LaTeX Resume Generation
+- Professional templates with modern design
+- ATS-optimized formatting
+- Instant preview capability
+- One-click PDF generation
+- Clean, compilable LaTeX code
+
+### Prompt Engineering
+- Advanced prompt security and sanitization
+- Structured output schemas for consistent results
+- Context-aware generation based on analysis
+- Optimized token usage for cost efficiency
+
+### Error Handling
+- Graceful degradation when services are unavailable
+- User-friendly error messages with actionable advice
+- Automatic retry mechanisms for transient failures
+- Comprehensive logging for debugging
 
 ## 🛡️ Security Features
 
@@ -191,6 +277,8 @@ The application uses Google's Gemini API with the following limits:
 - **File validation** ensures only safe file types are processed
 - **Rate limiting** prevents abuse and ensures fair usage
 - **Error handling** provides safe fallbacks for all operations
+- **CORS protection** secures API endpoints
+- **Environment variable protection** keeps sensitive data secure
 
 ## 📝 License
 
@@ -199,10 +287,21 @@ MIT License - see LICENSE file for details.
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes
 4. Test thoroughly
-5. Submit a pull request
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Submit a pull request
+
+## 🌟 Roadmap
+
+- [ ] **Multi-language support** - Resume analysis in multiple languages
+- [ ] **Template library** - Multiple LaTeX templates to choose from
+- [ ] **Resume scoring history** - Track improvement over time
+- [ ] **Batch processing** - Analyze multiple resumes at once
+- [ ] **Integration APIs** - Connect with job boards and ATS systems
+- [ ] **Advanced analytics** - Detailed usage and improvement metrics
 
 ## 📞 Support
 
@@ -210,8 +309,18 @@ If you encounter any issues:
 
 1. Check the troubleshooting section above
 2. Review the server logs for detailed error information
-3. Create an issue with detailed steps to reproduce the problem
+3. Check browser console for client-side errors
+4. Create an issue with detailed steps to reproduce the problem
+
+### Getting Help
+
+- **Documentation**: This README covers all features
+- **Issues**: Use GitHub issues for bug reports
+- **Discussions**: Use GitHub discussions for questions
+- **Email**: Contact for urgent production issues
 
 ---
 
-**Made with ❤️ using Google Gemini AI**
+**Made with ❤️ using Google Gemini AI and modern web technologies**
+
+*Transform your resume with AI-powered analysis and professional LaTeX generation*
