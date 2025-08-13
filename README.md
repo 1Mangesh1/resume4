@@ -343,7 +343,6 @@ If you encounter any issues:
 **Made with ❤️ using Google Gemini AI and modern web technologies**
 
 _Transform your resume with AI-powered analysis and professional LaTeX generation_
-
 -- chat with resume
 
 ```mermaid

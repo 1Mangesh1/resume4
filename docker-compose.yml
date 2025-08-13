@@ -1,0 +1,84 @@
+version: "3.8"
+
+services:
+  resume-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: resume-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DOCKERIZED=true
+      - TEXLIVE_PATH=/usr/bin/pdflatex
+      - TEMP_DIR=/app/temp
+      - LOG_LEVEL=debug
+      - GOOGLE_GENERATIVE_AI_API_KEY=${GOOGLE_GENERATIVE_AI_API_KEY}
+    volumes:
+      # Mount temp and uploads for persistence
+      - ./temp:/app/temp
+      - ./uploads:/app/uploads
+      # Mount source code for development (hot reload)
+      - ./:/app
+      - /app/node_modules # Exclude node_modules from host mount
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    depends_on:
+      - redis
+    networks:
+      - resume-network
+
+  # Redis for caching (optional but recommended for production)
+  redis:
+    image: redis:7-alpine
+    container_name: resume-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - resume-network
+
+  # Optional: Nginx reverse proxy for production
+  nginx:
+    image: nginx:alpine
+    container_name: resume-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro # Mount SSL certificates
+    depends_on:
+      - resume-generator
+    restart: unless-stopped
+    networks:
+      - resume-network
+    profiles:
+      - production
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  resume-network:
+    driver: bridge

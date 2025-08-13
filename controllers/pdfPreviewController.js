@@ -1,13 +1,13 @@
 const LaTeXResumeGenerator = require("../lib/latex-generator");
 const LatexPDFGenerator = require("../lib/latex-pdf-generator");
-const AdvancedLatexService = require("../lib/advanced-latex-service");
+const IntegratedLatexService = require("../lib/integrated-latex-service");
 const { AIService } = require("../lib/ai-service");
 
 class PDFPreviewController {
   constructor() {
     this.latexGenerator = new LaTeXResumeGenerator();
     this.pdfGenerator = new LatexPDFGenerator();
-    this.advancedLatexService = new AdvancedLatexService();
+    this.integratedLatexService = new IntegratedLatexService();
     this.aiService = new AIService();
 
     // Cache for PDF previews to improve performance
@@ -153,27 +153,26 @@ class PDFPreviewController {
         });
       }
 
-      console.log("🔄 Generating PDF with Advanced LaTeX Service...");
-      console.log(`📄 Preferred method: ${preferredMethod || "auto-detect"}`);
+      console.log("🔄 Generating PDF with Integrated LaTeX Service...");
+      console.log(`📄 Using integrated pdflatex compilation`);
 
       // Validate LaTeX before processing
       const validation = this.pdfGenerator.validateLaTeX(latexCode);
       if (!validation.isValid) {
         console.warn("⚠️ LaTeX validation issues:", validation.issues);
-        // Continue anyway - advanced service might handle it better
+        // Continue anyway - integrated service will handle cleaning
       }
 
-      // Use the Advanced LaTeX Service with intelligent fallbacks
-      const result = await this.advancedLatexService.compileToPDF(
+      // Use the Integrated LaTeX Service
+      const result = await this.integratedLatexService.compileToPDF(
         latexCode,
-        filename,
-        preferredMethod
+        filename
       );
 
       if (result.success) {
         const base64Pdf = result.pdfBuffer.toString("base64");
 
-        console.log("✅ PDF generated successfully with advanced service");
+        console.log("✅ PDF generated successfully with integrated LaTeX");
         console.log(`📄 Method: ${result.method}, Quality: ${result.quality}`);
 
         res.json({
@@ -185,15 +184,16 @@ class PDFPreviewController {
             contentType: result.contentType,
             method: result.method,
             quality: result.quality,
-            warning: this.getMethodWarning(result.method),
+            warning: null, // No warnings needed for integrated LaTeX
           },
         });
       } else {
-        console.error("❌ All PDF generation methods failed");
+        console.error("❌ Integrated LaTeX PDF generation failed");
         res.status(500).json({
           success: false,
-          error: "All PDF generation methods failed",
-          details: result.error,
+          error:
+            "We're sorry, but we couldn't generate your PDF preview. Please try again later.",
+          details: "LaTeX compilation failed",
         });
       }
     } catch (error) {
@@ -360,14 +360,9 @@ class PDFPreviewController {
             maxAge: this.cacheExpiry,
           },
           features: [
-            "Multi-method LaTeX compilation",
-            "Docker-based compilation (Overleaf quality)",
-            "Local pdflatex support",
-            "KaTeX + HTML rendering",
-            "Enhanced manual parsing",
-            "Intelligent fallback system",
-            "Preview caching",
+            "Docker-based LaTeX compilation (Overleaf quality)",
             "Professional typography",
+            "Preview caching",
             "Memory-efficient processing",
           ],
         },
@@ -421,19 +416,6 @@ class PDFPreviewController {
         this.previewCache.delete(key);
       }
     }
-  }
-
-  getMethodWarning(method) {
-    const warnings = {
-      enhanced_manual:
-        "Using manual parser - for best quality, install Docker or pdflatex",
-      texlive_api: "Using external API - may have memory limits",
-      katex_html: "HTML-rendered PDF - good quality but not native LaTeX",
-      local_docker: null, // No warning for Docker method
-      local_binary: null, // No warning for local binary method
-    };
-
-    return warnings[method] || undefined;
   }
 }
 
