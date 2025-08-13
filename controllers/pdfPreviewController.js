@@ -1,11 +1,13 @@
 const LaTeXResumeGenerator = require("../lib/latex-generator");
 const LatexPDFGenerator = require("../lib/latex-pdf-generator");
+const AdvancedLatexService = require("../lib/advanced-latex-service");
 const { AIService } = require("../lib/ai-service");
 
 class PDFPreviewController {
   constructor() {
     this.latexGenerator = new LaTeXResumeGenerator();
     this.pdfGenerator = new LatexPDFGenerator();
+    this.advancedLatexService = new AdvancedLatexService();
     this.aiService = new AIService();
 
     // Cache for PDF previews to improve performance
@@ -121,11 +123,15 @@ class PDFPreviewController {
   }
 
   /**
-   * Generate PDF preview from provided LaTeX code
+   * Generate PDF preview from provided LaTeX code - ENHANCED WITH MULTI-METHOD SUPPORT
    */
   async generatePDFFromLatex(req, res) {
     try {
-      const { latexCode, filename = "custom-resume" } = req.body;
+      const {
+        latexCode,
+        filename = "custom-resume",
+        preferredMethod,
+      } = req.body;
 
       if (!latexCode) {
         return res.status(400).json({
@@ -134,25 +140,28 @@ class PDFPreviewController {
         });
       }
 
-      console.log("🔄 Generating PDF from provided LaTeX code...");
+      console.log("🔄 Generating PDF with Advanced LaTeX Service...");
+      console.log(`📄 Preferred method: ${preferredMethod || "auto-detect"}`);
 
-      // Validate LaTeX
+      // Validate LaTeX before processing
       const validation = this.pdfGenerator.validateLaTeX(latexCode);
       if (!validation.isValid) {
-        return res.status(400).json({
-          success: false,
-          error: "Invalid LaTeX code",
-          issues: validation.issues,
-        });
+        console.warn("⚠️ LaTeX validation issues:", validation.issues);
+        // Continue anyway - advanced service might handle it better
       }
 
-      // Generate PDF
-      const result = await this.pdfGenerator.generatePDF(latexCode, filename);
+      // Use the Advanced LaTeX Service with intelligent fallbacks
+      const result = await this.advancedLatexService.compileToPDF(
+        latexCode,
+        filename,
+        preferredMethod
+      );
 
       if (result.success) {
         const base64Pdf = result.pdfBuffer.toString("base64");
 
-        console.log("✅ PDF generated from LaTeX successfully");
+        console.log("✅ PDF generated successfully with advanced service");
+        console.log(`📄 Method: ${result.method}, Quality: ${result.quality}`);
 
         res.json({
           success: true,
@@ -161,20 +170,21 @@ class PDFPreviewController {
             size: result.size,
             filename: `${filename}.pdf`,
             contentType: result.contentType,
-            method: "latex.js + PDFKit",
-            warning: result.warning || undefined,
+            method: result.method,
+            quality: result.quality,
+            warning: this.getMethodWarning(result.method),
           },
         });
       } else {
-        console.error("❌ PDF generation failed:", result.error);
+        console.error("❌ All PDF generation methods failed");
         res.status(500).json({
           success: false,
-          error: "PDF generation failed",
+          error: "All PDF generation methods failed",
           details: result.error,
         });
       }
     } catch (error) {
-      console.error("❌ PDF generation error:", error);
+      console.error("❌ Advanced PDF generation error:", error);
       res.status(500).json({
         success: false,
         error: "PDF generation failed",
@@ -320,25 +330,32 @@ class PDFPreviewController {
   async getServiceInfo(req, res) {
     try {
       const serviceInfo = this.pdfGenerator.getServiceInfo();
+      const advancedServiceInfo = this.advancedLatexService.getServiceInfo();
+      const availableMethods =
+        await this.advancedLatexService.getAvailableMethods();
       const templates = await this.latexGenerator.getAvailableTemplates();
 
       res.json({
         success: true,
         data: {
           service: serviceInfo,
+          advancedService: advancedServiceInfo,
+          availableMethods: availableMethods,
           templates: templates,
           cacheInfo: {
             size: this.previewCache.size,
             maxAge: this.cacheExpiry,
           },
           features: [
-            "High-quality PDF generation",
-            "LaTeX.js parsing",
-            "PDFKit rendering",
-            "Overleaf-style output",
+            "Multi-method LaTeX compilation",
+            "Docker-based compilation (Overleaf quality)",
+            "Local pdflatex support",
+            "KaTeX + HTML rendering",
+            "Enhanced manual parsing",
+            "Intelligent fallback system",
             "Preview caching",
-            "Fallback parsing",
             "Professional typography",
+            "Memory-efficient processing",
           ],
         },
       });
@@ -391,6 +408,19 @@ class PDFPreviewController {
         this.previewCache.delete(key);
       }
     }
+  }
+
+  getMethodWarning(method) {
+    const warnings = {
+      enhanced_manual:
+        "Using manual parser - for best quality, install Docker or pdflatex",
+      texlive_api: "Using external API - may have memory limits",
+      katex_html: "HTML-rendered PDF - good quality but not native LaTeX",
+      local_docker: null, // No warning for Docker method
+      local_binary: null, // No warning for local binary method
+    };
+
+    return warnings[method] || undefined;
   }
 }
 

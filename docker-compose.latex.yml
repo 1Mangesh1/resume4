@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  latex-compiler:
+    build:
+      context: ./docker/latex
+      dockerfile: Dockerfile
+    volumes:
+      - ./temp:/workspace
+    working_dir: /workspace
+    command: tail -f /dev/null # Keep container running
+    container_name: latex-compiler
+    restart: unless-stopped
+    networks:
+      - latex-network
+
+  # Removed app service - not needed for LaTeX compilation only
+
+networks:
+  latex-network:
+    driver: bridge

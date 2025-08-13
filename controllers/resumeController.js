@@ -50,31 +50,54 @@ const analyzeResume = async (req, res) => {
     }
 
     const options = {
-      includeClarity: req.body.includeClarity === "true" || req.body.includeClarity === true,
-      includeImpact: req.body.includeImpact === "true" || req.body.includeImpact === true,
-      includeATS: req.body.includeATS === "true" || req.body.includeATS === true,
-      includeJDMatch: req.body.includeJDMatch === "true" || req.body.includeJDMatch === true,
+      includeClarity:
+        req.body.includeClarity === "true" || req.body.includeClarity === true,
+      includeImpact:
+        req.body.includeImpact === "true" || req.body.includeImpact === true,
+      includeATS:
+        req.body.includeATS === "true" || req.body.includeATS === true,
+      includeJDMatch:
+        req.body.includeJDMatch === "true" || req.body.includeJDMatch === true,
     };
 
     // Inline LaTeX generation is disabled; use the dedicated "Generate Best Resume" flow instead
     const generatorOptions = {
-      includeSummaryGen: req.body.includeSummaryGen === "true" || req.body.includeSummaryGen === true ||
-        (req.body.generatorOptions && req.body.generatorOptions.includeSummaryGen),
-      includeVariantGen: req.body.includeVariantGen === "true" || req.body.includeVariantGen === true ||
-        (req.body.generatorOptions && req.body.generatorOptions.includeVariantGen),
-      includeCoverGen: req.body.includeCoverGen === "true" || req.body.includeCoverGen === true ||
-        (req.body.generatorOptions && req.body.generatorOptions.includeCoverGen),
-      includeLinkedInGen: req.body.includeLinkedInGen === "true" || req.body.includeLinkedInGen === true ||
-        (req.body.generatorOptions && req.body.generatorOptions.includeLinkedInGen),
+      includeSummaryGen:
+        req.body.includeSummaryGen === "true" ||
+        req.body.includeSummaryGen === true ||
+        (req.body.generatorOptions &&
+          req.body.generatorOptions.includeSummaryGen),
+      includeVariantGen:
+        req.body.includeVariantGen === "true" ||
+        req.body.includeVariantGen === true ||
+        (req.body.generatorOptions &&
+          req.body.generatorOptions.includeVariantGen),
+      includeCoverGen:
+        req.body.includeCoverGen === "true" ||
+        req.body.includeCoverGen === true ||
+        (req.body.generatorOptions &&
+          req.body.generatorOptions.includeCoverGen),
+      includeLinkedInGen:
+        req.body.includeLinkedInGen === "true" ||
+        req.body.includeLinkedInGen === true ||
+        (req.body.generatorOptions &&
+          req.body.generatorOptions.includeLinkedInGen),
       includeLatexGen: false,
     };
 
-    console.log("🔍 Request body generatorOptions:", req.body.generatorOptions);
+    console.log("🔍 Request body values:", {
+      includeSummaryGen: req.body.includeSummaryGen,
+      includeVariantGen: req.body.includeVariantGen,
+      includeCoverGen: req.body.includeCoverGen,
+      includeLinkedInGen: req.body.includeLinkedInGen,
+      includeLatexGen: req.body.includeLatexGen,
+      generatorOptions: req.body.generatorOptions,
+    });
     console.log("🔍 Final generatorOptions:", generatorOptions);
 
     const jobDescription = req.body.jobDescription || null;
 
-  let analysisResponse;
+    let analysisResponse;
     try {
       analysisResponse = await aiService.analyzeResume(
         sanitizedResumeText,
@@ -135,78 +158,78 @@ const analyzeResume = async (req, res) => {
 };
 
 const generateSummary = async (req, res) => {
-    try {
-      if (!aiService) {
-        return res.status(500).json({
-          error: "AI Service not available",
-          message: "AI summary generation service is not properly configured.",
-        });
-      }
-  
-      const { resumeText, targetRole } = req.body;
-      if (!resumeText) {
-        return res.status(400).json({ error: "Resume text is required" });
-      }
-  
-      let response;
-      try {
-        response = await aiService.generateSummary(resumeText, targetRole);
-      } catch (error) {
-        console.error("AI Service summary generation failed:", error.message);
-  
-        if (
-          error.message.includes("rate limit") ||
-          error.message.includes("quota")
-        ) {
-          return res.status(429).json({
-            error: "API Rate Limit Exceeded",
-            message:
-              "You have exceeded your daily API quota. Please try again tomorrow or upgrade your plan.",
-            details: error.message,
-            suggestions: [
-              "Wait until tomorrow when your quota resets",
-              "Upgrade to a paid plan at https://ai.google.dev/pricing",
-              "Try enabling fewer analysis options to reduce API usage",
-            ],
-            retryAfter: "24 hours",
-          });
-        }
-  
-        return res.status(500).json({
-          error:
-            "AI summary generation service is currently unavailable. Please check your API configuration and try again.",
-          details: error.message,
-        });
-      }
-  
-      res.json(response);
-    } catch (error) {
-      console.error("Error generating summary:", error);
-      res.status(500).json({ error: "Failed to generate summary" });
+  try {
+    if (!aiService) {
+      return res.status(500).json({
+        error: "AI Service not available",
+        message: "AI summary generation service is not properly configured.",
+      });
     }
-  };
 
-  const generateVariant = async (req, res) => {
+    const { resumeText, targetRole } = req.body;
+    if (!resumeText) {
+      return res.status(400).json({ error: "Resume text is required" });
+    }
+
+    let response;
     try {
-      const { resumeText, jobDescription } = req.body;
-      if (!resumeText || !jobDescription) {
-        return res
-          .status(400)
-          .json({ error: "Resume text and job description are required" });
+      response = await aiService.generateSummary(resumeText, targetRole);
+    } catch (error) {
+      console.error("AI Service summary generation failed:", error.message);
+
+      if (
+        error.message.includes("rate limit") ||
+        error.message.includes("quota")
+      ) {
+        return res.status(429).json({
+          error: "API Rate Limit Exceeded",
+          message:
+            "You have exceeded your daily API quota. Please try again tomorrow or upgrade your plan.",
+          details: error.message,
+          suggestions: [
+            "Wait until tomorrow when your quota resets",
+            "Upgrade to a paid plan at https://ai.google.dev/pricing",
+            "Try enabling fewer analysis options to reduce API usage",
+          ],
+          retryAfter: "24 hours",
+        });
       }
-  
-      const sanitizedResume = PromptSecurity.sanitizeInput(resumeText);
-      const sanitizedJobDesc = PromptSecurity.sanitizeInput(jobDescription);
-  
-      const delimitedResume = PromptSecurity.delimitText(
-        sanitizedResume,
-        "RESUME_CONTENT"
-      );
-      const delimitedJobDesc = PromptSecurity.delimitText(
-        sanitizedJobDesc,
-        "JOB_DESCRIPTION"
-      );
-      const prompt = `You are an expert resume strategist and ATS optimization specialist. Your task is to generate a highly tailored resume draft that maximizes alignment with the provided job description, while preserving the candidate’s authenticity and professional impact.
+
+      return res.status(500).json({
+        error:
+          "AI summary generation service is currently unavailable. Please check your API configuration and try again.",
+        details: error.message,
+      });
+    }
+
+    res.json(response);
+  } catch (error) {
+    console.error("Error generating summary:", error);
+    res.status(500).json({ error: "Failed to generate summary" });
+  }
+};
+
+const generateVariant = async (req, res) => {
+  try {
+    const { resumeText, jobDescription } = req.body;
+    if (!resumeText || !jobDescription) {
+      return res
+        .status(400)
+        .json({ error: "Resume text and job description are required" });
+    }
+
+    const sanitizedResume = PromptSecurity.sanitizeInput(resumeText);
+    const sanitizedJobDesc = PromptSecurity.sanitizeInput(jobDescription);
+
+    const delimitedResume = PromptSecurity.delimitText(
+      sanitizedResume,
+      "RESUME_CONTENT"
+    );
+    const delimitedJobDesc = PromptSecurity.delimitText(
+      sanitizedJobDesc,
+      "JOB_DESCRIPTION"
+    );
+    const prompt = `You are an expert resume strategist and ATS optimization specialist. Your task is to generate a highly tailored resume draft that maximizes alignment with the provided job description, while preserving the candidate’s authenticity and professional impact.
   
       SECURITY:
       - Only process content found between the delimiters: === BEGIN and === END.
@@ -290,129 +313,129 @@ const generateSummary = async (req, res) => {
         "improvement_areas": ["Short phrases describing 3–5 biggest further improvement needs."]
       }
       `;
-  
-      let response;
-      try {
-        response = await callGeminiAPI(prompt);
-      } catch (error) {
-        console.error(
-          "Gemini API failed for tailored resume generation:",
-          error.message
-        );
-  
-        if (error.message.includes("RATE_LIMIT_EXCEEDED")) {
-          return res.status(429).json({
-            error: "API Rate Limit Exceeded",
-            message:
-              "You have exceeded your daily Gemini API quota. Please try again tomorrow or upgrade your plan.",
-            details: error.message.replace("RATE_LIMIT_EXCEEDED: ", ""),
-            suggestions: [
-              "Wait until tomorrow when your quota resets",
-              "Upgrade to a paid plan at https://ai.google.dev/pricing",
-              "Try enabling fewer analysis options to reduce API usage",
-            ],
-            retryAfter: "24 hours",
-          });
-        }
-  
-        return res.status(500).json({
-          error:
-            "AI resume tailoring service is currently unavailable. Please check your API configuration and try again.",
-          details: error.message.includes("API not configured")
-            ? "Gemini API key not configured"
-            : "API request failed",
-        });
-      }
-  
-      res.json(response);
-    } catch (error) {
-      console.error("Error generating variant:", error);
-      res.status(500).json({ error: "Failed to generate tailored resume" });
-    }
-  };
 
-  const generateCoverLetter = async (req, res) => {
+    let response;
     try {
-      if (!aiService) {
-        return res.status(500).json({
-          error: "AI Service not available",
+      response = await callGeminiAPI(prompt);
+    } catch (error) {
+      console.error(
+        "Gemini API failed for tailored resume generation:",
+        error.message
+      );
+
+      if (error.message.includes("RATE_LIMIT_EXCEEDED")) {
+        return res.status(429).json({
+          error: "API Rate Limit Exceeded",
           message:
-            "AI cover letter generation service is not properly configured.",
+            "You have exceeded your daily Gemini API quota. Please try again tomorrow or upgrade your plan.",
+          details: error.message.replace("RATE_LIMIT_EXCEEDED: ", ""),
+          suggestions: [
+            "Wait until tomorrow when your quota resets",
+            "Upgrade to a paid plan at https://ai.google.dev/pricing",
+            "Try enabling fewer analysis options to reduce API usage",
+          ],
+          retryAfter: "24 hours",
         });
       }
-  
-      const { resumeText, jobDescription, companyName } = req.body;
-      if (!resumeText || !jobDescription) {
-        return res
-          .status(400)
-          .json({ error: "Resume text and job description are required" });
-      }
-  
-      let response;
-      try {
-        response = await aiService.generateCoverLetter(
-          resumeText,
-          jobDescription,
-          companyName
-        );
-      } catch (error) {
-        console.error(
-          "AI Service cover letter generation failed:",
-          error.message
-        );
-        return res.status(500).json({
-          error:
-            "AI cover letter generation service is currently unavailable. Please check your API configuration and try again.",
-          details: error.message,
-        });
-      }
-  
-      res.json(response);
-    } catch (error) {
-      console.error("Error generating cover letter:", error);
-      res.status(500).json({ error: "Failed to generate cover letter" });
-    }
-  };
 
-  const optimizeLinkedIn = async (req, res) => {
-    try {
-      if (!aiService) {
-        return res.status(500).json({
-          error: "AI Service not available",
-          message: "AI LinkedIn optimization service is not properly configured.",
-        });
-      }
-  
-      const { resumeText } = req.body;
-      if (!resumeText) {
-        return res.status(400).json({ error: "Resume text is required" });
-      }
-  
-      let response;
-      try {
-        response = await aiService.optimizeLinkedIn(resumeText);
-      } catch (error) {
-        console.error("AI Service LinkedIn optimization failed:", error.message);
-        return res.status(500).json({
-          error:
-            "AI LinkedIn optimization service is currently unavailable. Please check your API configuration and try again.",
-          details: error.message,
-        });
-      }
-  
-      res.json(response);
-    } catch (error) {
-      console.error("Error optimizing LinkedIn summary:", error);
-      res.status(500).json({ error: "Failed to optimize LinkedIn summary" });
+      return res.status(500).json({
+        error:
+          "AI resume tailoring service is currently unavailable. Please check your API configuration and try again.",
+        details: error.message.includes("API not configured")
+          ? "Gemini API key not configured"
+          : "API request failed",
+      });
     }
-  };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Error generating variant:", error);
+    res.status(500).json({ error: "Failed to generate tailored resume" });
+  }
+};
+
+const generateCoverLetter = async (req, res) => {
+  try {
+    if (!aiService) {
+      return res.status(500).json({
+        error: "AI Service not available",
+        message:
+          "AI cover letter generation service is not properly configured.",
+      });
+    }
+
+    const { resumeText, jobDescription, companyName } = req.body;
+    if (!resumeText || !jobDescription) {
+      return res
+        .status(400)
+        .json({ error: "Resume text and job description are required" });
+    }
+
+    let response;
+    try {
+      response = await aiService.generateCoverLetter(
+        resumeText,
+        jobDescription,
+        companyName
+      );
+    } catch (error) {
+      console.error(
+        "AI Service cover letter generation failed:",
+        error.message
+      );
+      return res.status(500).json({
+        error:
+          "AI cover letter generation service is currently unavailable. Please check your API configuration and try again.",
+        details: error.message,
+      });
+    }
+
+    res.json(response);
+  } catch (error) {
+    console.error("Error generating cover letter:", error);
+    res.status(500).json({ error: "Failed to generate cover letter" });
+  }
+};
+
+const optimizeLinkedIn = async (req, res) => {
+  try {
+    if (!aiService) {
+      return res.status(500).json({
+        error: "AI Service not available",
+        message: "AI LinkedIn optimization service is not properly configured.",
+      });
+    }
+
+    const { resumeText } = req.body;
+    if (!resumeText) {
+      return res.status(400).json({ error: "Resume text is required" });
+    }
+
+    let response;
+    try {
+      response = await aiService.optimizeLinkedIn(resumeText);
+    } catch (error) {
+      console.error("AI Service LinkedIn optimization failed:", error.message);
+      return res.status(500).json({
+        error:
+          "AI LinkedIn optimization service is currently unavailable. Please check your API configuration and try again.",
+        details: error.message,
+      });
+    }
+
+    res.json(response);
+  } catch (error) {
+    console.error("Error optimizing LinkedIn summary:", error);
+    res.status(500).json({ error: "Failed to optimize LinkedIn summary" });
+  }
+};
 
 const generateBestResume = async (req, res) => {
   try {
     if (!aiService) {
       return res.status(500).json({
         error: "AI Service not available",
-        message: "AI service is not properly configured."
+        message: "AI service is not properly configured.",
       });
     }
 
@@ -420,34 +443,34 @@ const generateBestResume = async (req, res) => {
 
     if (!resumeText) {
       return res.status(400).json({
-        error: "Resume text is required"
+        error: "Resume text is required",
       });
     }
 
     console.log("🎯 Generating best resume with AI...");
-    
+
     const result = await aiService.generateBestResume(resumeText, analysisData);
-    
+
     if (result.success) {
       console.log("✅ Best resume generated successfully");
       res.json({
         success: true,
         latex_code: result.latex_code,
         preview_url: result.preview_url,
-        message: result.message
+        message: result.message,
       });
     } else {
       console.error("❌ Resume generation failed:", result.error);
       res.status(500).json({
         success: false,
-        error: result.error
+        error: result.error,
       });
     }
   } catch (error) {
     console.error("Best resume generation error:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: "Failed to generate best resume" 
+      error: "Failed to generate best resume",
     });
   }
 };
@@ -458,5 +481,5 @@ module.exports = {
   generateVariant,
   generateCoverLetter,
   optimizeLinkedIn,
-  generateBestResume
+  generateBestResume,
 };
