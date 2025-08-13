@@ -61,11 +61,24 @@ class PDFPreviewController {
         { includeLatexGen: true }
       );
 
-      const resumeData = this.aiService.extractResumeData(
-        resumeText,
-        aiAnalysis
-      );
-      const latexCode = this.latexGenerator.generateFromJSON(resumeData);
+      // Use AI-generated LaTeX if available, otherwise fallback to template
+      let latexCode;
+      if (
+        aiAnalysis.latex_resume &&
+        aiAnalysis.latex_resume.latex_source &&
+        aiAnalysis.latex_resume.latex_source.length > 100 &&
+        !aiAnalysis.latex_resume.latex_source.startsWith("%")
+      ) {
+        console.log("✅ Using AI-generated LaTeX with enhanced formatting");
+        latexCode = aiAnalysis.latex_resume.latex_source;
+      } else {
+        console.log("⚠️ AI LaTeX not available, using template fallback");
+        const resumeData = this.aiService.extractResumeData(
+          resumeText,
+          aiAnalysis
+        );
+        latexCode = this.latexGenerator.generateFromJSON(resumeData);
+      }
 
       // Validate LaTeX
       const validation = this.pdfGenerator.validateLaTeX(latexCode);

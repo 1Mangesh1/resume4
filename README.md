@@ -345,3 +345,9 @@ If you encounter any issues:
 _Transform your resume with AI-powered analysis and professional LaTeX generation_
 
 -- chat with resume
+
+```mermaid
+User Request → AI Analysis → AI Generates Enhanced LaTeX → PDF Preview Uses AI LaTeX → Enhanced PDF Output
+     ↓              ↓              ↓                    ↓                    ↓
+Resume Text → Gemini AI → LaTeX with \textendash{} → AdvancedLatexService → Professional PDF
+```
