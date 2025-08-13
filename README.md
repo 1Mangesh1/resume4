@@ -146,6 +146,7 @@ A comprehensive, AI-powered web application that analyzes resumes using Google's
 ## 🎯 How to Use
 
 ### 1. **Resume Analysis**
+
 1. Choose input method (text or file upload)
 2. Paste resume text or upload PDF/DOCX file
 3. Optionally add job description for targeted analysis
@@ -154,6 +155,7 @@ A comprehensive, AI-powered web application that analyzes resumes using Google's
 6. Review detailed scores and feedback
 
 ### 2. **Generate Best Resume**
+
 1. Complete resume analysis first
 2. Click "Generate Best Resume" button
 3. Wait for AI to generate professional LaTeX code
@@ -162,10 +164,12 @@ A comprehensive, AI-powered web application that analyzes resumes using Google's
 6. Download PDF directly from the server
 
 Optional: TeX-Less PDF (no TeX Live)
+
 - POST /api/generate-pdf with JSON { "latexCode": "..." }
 - Streams a PDF generated with Node (latex.js + pdfkit)
 
 ### 3. **Content Generation**
+
 - Enable specific generators during analysis
 - Get AI-generated summaries, cover letters, and LinkedIn content
 - Copy generated content for immediate use
@@ -173,6 +177,7 @@ Optional: TeX-Less PDF (no TeX Live)
 ## 🔧 Technical Stack
 
 ### Backend
+
 - **Node.js** - Runtime environment
 - **Express.js** - Web framework
 - **Multer** - File upload handling
@@ -181,12 +186,14 @@ Optional: TeX-Less PDF (no TeX Live)
 - **Mammoth** - DOCX text extraction
 
 ### Frontend
+
 - **Vanilla JavaScript** - Client-side functionality
 - **Tailwind CSS** - Utility-first styling
 - **HTML5** - Modern semantic markup
 - **CSS3** - Advanced styling and animations
 
 ### AI & Processing
+
 - **Google Gemini 2.0 Flash** - Advanced language model
 - **Structured Prompts** - Optimized prompt engineering
 - **Token Management** - Efficient API usage
@@ -197,26 +204,31 @@ Optional: TeX-Less PDF (no TeX Live)
 ### Common Issues
 
 **❌ "API not configured" error**
+
 - Make sure you have set the `GOOGLE_GENERATIVE_AI_API_KEY` environment variable
 - Check that your API key is valid and has quota remaining
 - Restart the server after setting the environment variable
 
 **❌ "LaTeX compilation failed" error**
+
 - Try the "Generate Best Resume" feature for better LaTeX output
 - Use TeXlive.net preview for instant PDF generation
 - Check LaTeX syntax if editing manually
 
 **❌ "File upload failed" error**
+
 - Check file size (max 5MB)
 - Ensure file is PDF, DOCX, or TXT format
 - Try refreshing the page and uploading again
 
 **❌ "Generate Best Resume not working"**
+
 - Ensure you've completed resume analysis first
 - Check browser console for JavaScript errors
 - Verify server is running and API is responding
 
 **❌ "Preview not opening"**
+
 - Check if popup blockers are enabled
 - Try copying LaTeX code and opening TeXlive.net manually
 - Ensure internet connection for external preview
@@ -257,6 +269,7 @@ The application uses Google's Gemini API with the following considerations:
 ## 🌟 Advanced Features
 
 ### LaTeX Resume Generation
+
 - Professional templates with modern design
 - ATS-optimized formatting
 - Instant preview capability
@@ -264,12 +277,14 @@ The application uses Google's Gemini API with the following considerations:
 - Clean, compilable LaTeX code
 
 ### Prompt Engineering
+
 - Advanced prompt security and sanitization
 - Structured output schemas for consistent results
 - Context-aware generation based on analysis
 - Optimized token usage for cost efficiency
 
 ### Error Handling
+
 - Graceful degradation when services are unavailable
 - User-friendly error messages with actionable advice
 - Automatic retry mechanisms for transient failures
@@ -327,4 +342,6 @@ If you encounter any issues:
 
 **Made with ❤️ using Google Gemini AI and modern web technologies**
 
-*Transform your resume with AI-powered analysis and professional LaTeX generation*
+_Transform your resume with AI-powered analysis and professional LaTeX generation_
+
+-- chat with resume

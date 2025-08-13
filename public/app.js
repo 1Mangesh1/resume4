@@ -17,9 +17,7 @@ let overallScore,
   clarityScore,
   clarityProgress,
   clarityFeedback;
-let impactScore,
-  impactProgress,
-  impactFeedback;
+let impactScore, impactProgress, impactFeedback;
 
 // Tiny debounce utility used for text input listeners
 function debounce(fn, wait = 300) {
@@ -34,8 +32,7 @@ function debounce(fn, wait = 300) {
 let apiCallCount = parseInt(localStorage.getItem("apiCallCount") || "0", 10);
 let lastResetDate =
   localStorage.getItem("lastResetDate") || new Date().toDateString();
-let currentInputMethod =
-  localStorage.getItem("currentInputMethod") || "file"; // 'text' | 'file'
+let currentInputMethod = localStorage.getItem("currentInputMethod") || "file"; // 'text' | 'file'
 let selectedFile = null;
 
 function updateApiUsage() {
@@ -426,11 +423,13 @@ document.addEventListener("DOMContentLoaded", function () {
     includeJDMatch.addEventListener("change", toggleJobDescriptionSection);
 
   // Best Resume Generation Event Listeners
-  const generateBestResumeBtn = document.getElementById("generateBestResumeBtn");
+  const generateBestResumeBtn = document.getElementById(
+    "generateBestResumeBtn"
+  );
   const previewResumeBtn = document.getElementById("previewResumeBtn");
   const copyLatexBtn = document.getElementById("copyLatexBtn");
   const downloadPdfBtn = document.getElementById("downloadPdfBtn");
-  
+
   if (generateBestResumeBtn) {
     generateBestResumeBtn.addEventListener("click", () => {
       if (window.generateBestResume) {
@@ -644,19 +643,18 @@ function updateGeneratorUI() {
 
 function validateGeneratorSelection() {
   try {
-
     updateGeneratorUI();
 
     const hint = document.getElementById("generatorSelectionHint");
     if (hint) {
-      const ids = [
-        "includeSummaryGen",
-        "includeVariantGen",
-        "includeCoverGen",
-        "includeLinkedInGen",
-        "includeLatexGen",
-      ];
-      const anySelected = ids.some((id) => document.getElementById(id)?.checked);
+      // More efficient to just check each checkbox once instead of creating an array first
+      const anySelected =
+        document.getElementById("includeSummaryGen")?.checked ||
+        document.getElementById("includeVariantGen")?.checked ||
+        document.getElementById("includeCoverGen")?.checked ||
+        document.getElementById("includeLinkedInGen")?.checked ||
+        document.getElementById("includeLatexGen")?.checked;
+
       hint.classList.toggle("hidden", anySelected);
     }
   } catch (e) {
@@ -1190,8 +1188,10 @@ function displayGeneratedContent(data) {
   } else {
     console.log("❌ Resume summary check failed:", {
       hasResumeSum: !!data.resume_summary,
-      hasOptSum: !!(data.resume_summary && data.resume_summary.optimized_summary),
-      structure: data.resume_summary
+      hasOptSum: !!(
+        data.resume_summary && data.resume_summary.optimized_summary
+      ),
+      structure: data.resume_summary,
     });
   }
 
@@ -1228,10 +1228,12 @@ function displayGeneratedContent(data) {
         }
         
         ${
-          (variantData.match_percentage && (
-            (data && data.job_description_provided === true) ||
-            (typeof jobDescription !== 'undefined' && jobDescription && jobDescription.value && jobDescription.value.trim().length > 0)
-          ))
+          variantData.match_percentage &&
+          ((data && data.job_description_provided === true) ||
+            (typeof jobDescription !== "undefined" &&
+              jobDescription &&
+              jobDescription.value &&
+              jobDescription.value.trim().length > 0))
             ? `
           <div class="mb-6">
             <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Job Match Analysis</h4>
@@ -1259,7 +1261,7 @@ function displayGeneratedContent(data) {
   } else {
     console.log("❌ Tailored resume check failed:", {
       hasTailoredResume: !!data.tailored_resume,
-      structure: data.tailored_resume
+      structure: data.tailored_resume,
     });
   }
 
@@ -1364,12 +1366,16 @@ function displayGeneratedContent(data) {
     // Prefer resume text returned from backend (works for file uploads too)
     if (data && data.resume_source_text) {
       window.lastAnalyzedResumeText = data.resume_source_text;
-      try { extractedResumeText = data.resume_source_text; } catch(_){}
+      try {
+        extractedResumeText = data.resume_source_text;
+      } catch (_) {}
     } else {
       const ta = document.getElementById("resumeText");
       if (ta && ta.value) {
         window.lastAnalyzedResumeText = ta.value;
-        try { extractedResumeText = ta.value; } catch(_){}
+        try {
+          extractedResumeText = ta.value;
+        } catch (_) {}
       }
     }
   } catch (e) {
@@ -1387,7 +1393,7 @@ function displayGeneratedContent(data) {
   } else {
     console.log("❌ Not showing container:", {
       hasGeneratedContent,
-      hasBlockClass: contentContainer.classList.contains("block")
+      hasBlockClass: contentContainer.classList.contains("block"),
     });
   }
 }
@@ -1834,7 +1840,15 @@ async function downloadPdf(latexId) {
 function regenerateLatex(latexId) {
   const storedData = JSON.parse(localStorage.getItem("lastAnalysis") || "{}");
   if (storedData.resumeText && storedData.analysis) {
-    generateLatexResume(storedData.resumeText, storedData.analysis, true);
+    // Call the appropriate resume generation function
+    if (window.generateBestResume) {
+      window.generateBestResume();
+    } else {
+      showToast(
+        "Best resume generator not available. Please try analyzing a resume first.",
+        "warning"
+      );
+    }
   } else {
     showToast(
       "No previous analysis found. Please analyze a resume first.",
@@ -1853,7 +1867,7 @@ function showToast(message, type = "info") {
       : type === "warning"
       ? "bg-yellow-500 text-white"
       : "bg-blue-500 text-white"
-   }`;
+  }`;
   toast.textContent = message;
 
   document.body.appendChild(toast);
@@ -1876,12 +1890,11 @@ function showApiUsageIndicator() {
     localStorage.setItem("apiCallCount", "0");
   }
 
+  // Cache element creation and avoid unnecessary DOM operations
   let indicator = document.getElementById("api-usage-indicator");
   if (!indicator) {
     indicator = document.createElement("div");
     indicator.id = "api-usage-indicator";
-    indicator.className =
-      "fixed top-4 left-4 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full text-xs text-gray-600 dark:text-gray-400 z-40";
     document.body.appendChild(indicator);
   }
 
@@ -2462,22 +2475,24 @@ function generateAdvancedInsights(advancedData) {
 }
 
 // Global variable to store the generated LaTeX code and extracted resume text
-let generatedLatexCode = '';
-let extractedResumeText = '';
+let generatedLatexCode = "";
+let extractedResumeText = "";
 
 // Generate Best Resume Function
 async function generateBestResume() {
-  const generateBestResumeBtn = document.getElementById("generateBestResumeBtn");
+  const generateBestResumeBtn = document.getElementById(
+    "generateBestResumeBtn"
+  );
   const bestResumeSection = document.getElementById("bestResumeSection");
   const latexCodeDisplay = document.getElementById("latexCodeDisplay");
-  
+
   if (!generateBestResumeBtn || !bestResumeSection || !latexCodeDisplay) {
     console.error("Required elements not found");
     return;
   }
 
   // Get the current resume text
-  let currentResumeText = '';
+  let currentResumeText = "";
   if (currentInputMethod === "text" && resumeText?.value) {
     currentResumeText = resumeText.value;
   } else if (extractedResumeText) {
@@ -2507,7 +2522,7 @@ async function generateBestResume() {
       },
       body: JSON.stringify({
         resumeText: currentResumeText,
-        analysisData: window.lastAnalysisResult || null
+        analysisData: window.lastAnalysisResult || null,
       }),
     });
 
@@ -2515,11 +2530,13 @@ async function generateBestResume() {
 
     if (result.success) {
       generatedLatexCode = result.latex_code;
-      try { window.lastBestPreviewUrl = result.preview_url; } catch(_){}
+      try {
+        window.lastBestPreviewUrl = result.preview_url;
+      } catch (_) {}
       latexCodeDisplay.textContent = result.latex_code;
       bestResumeSection.classList.remove("hidden");
       bestResumeSection.scrollIntoView({ behavior: "smooth" });
-      
+
       console.log("✅ Best resume generated successfully");
 
       // Auto-preview inline after generation
@@ -2545,9 +2562,11 @@ async function generateBestResume() {
 }
 
 // expose for early listeners
-try { window.generateBestResume = generateBestResume; } catch(_){}
+try {
+  window.generateBestResume = generateBestResume;
+} catch (_) {}
 
-// Preview Resume on TeXlive.net
+// High-Quality PDF Preview using latex.js + PDFKit
 async function previewResumePdfInline() {
   if (!generatedLatexCode) {
     alert("Please generate a resume first.");
@@ -2566,57 +2585,123 @@ async function previewResumePdfInline() {
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
     </svg>
-    Rendering…
+    Generating High-Quality Preview…
   `;
-  if (status) status.textContent = "Compiling LaTeX to PDF…";
+  if (status) status.textContent = "Generating high-quality PDF preview…";
 
   try {
-  // Ask backend to generate PDF via pure Node (no TeX Live) and return a PDF stream
-  const resp = await fetch('/api/generate-pdf', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ latexCode: generatedLatexCode, filename: 'resume' })
+    // Use new high-quality PDF preview endpoint
+    console.log("🔄 Generating high-quality PDF preview...");
+    const resp = await fetch("/api/pdf-from-latex", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        latexCode: generatedLatexCode,
+        filename: "resume-preview",
+      }),
     });
 
-  if (!resp.ok) {
-      // Fallback: avoid very long GET URLs; show a short message instead
+    if (!resp.ok) {
+      throw new Error(`HTTP ${resp.status}`);
+    }
+
+    const result = await resp.json();
+
+    if (result.success && result.data.pdfBase64) {
+      // Convert base64 to blob and display
+      const base64Data = result.data.pdfBase64;
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+
       if (frame) {
-        frame.classList.add('hidden');
+        frame.src = url;
+        frame.classList.remove("hidden");
       }
       if (placeholder) {
-        placeholder.classList.remove('hidden');
-        placeholder.textContent = 'Inline compile failed. Click Download PDF or try again.';
+        placeholder.classList.add("hidden");
+      }
+      if (status) {
+        const method = result.data.method || "latex.js + PDFKit";
+        status.textContent = `High-quality preview ready (${method})`;
+      }
+
+      // Show success message with method used
+      const warningMsg = result.data.warning ? ` (${result.data.warning})` : "";
+      showToast(
+        `✅ High-quality PDF preview generated${warningMsg}`,
+        "success"
+      );
+
+      console.log("✅ High-quality PDF preview generated successfully");
+      console.log(`📄 Size: ${(result.data.size / 1024).toFixed(1)} KB`);
+    } else {
+      throw new Error(result.error || "PDF generation failed");
+    }
+  } catch (e) {
+    console.error("High-quality PDF preview error:", e);
+
+    // Fallback to original method
+    console.log("🔄 Falling back to original PDF preview method...");
+    if (status) status.textContent = "Trying fallback method…";
+
+    try {
+      const fallbackResp = await fetch("/api/generate-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          latexCode: generatedLatexCode,
+          filename: "resume",
+        }),
+      });
+
+      if (
+        fallbackResp.ok &&
+        !fallbackResp.headers.get("Content-Type")?.includes("application/json")
+      ) {
+        const blob = await fallbackResp.blob();
+        const url = URL.createObjectURL(blob);
+
+        if (frame) {
+          frame.src = url;
+          frame.classList.remove("hidden");
+        }
+        if (placeholder) {
+          placeholder.classList.add("hidden");
+        }
+        if (status) status.textContent = "Preview ready (fallback method)";
+
+        showToast("⚠️ Used fallback PDF preview method", "warning");
+      } else {
+        throw new Error("Fallback also failed");
+      }
+    } catch (fallbackError) {
+      console.error("Fallback preview also failed:", fallbackError);
+
+      if (frame) frame.classList.add("hidden");
+      if (placeholder) {
+        placeholder.classList.remove("hidden");
+        placeholder.textContent =
+          "Preview failed. Click Download PDF or try again.";
       }
       if (status) status.textContent = "Preview unavailable; try Download PDF.";
-      return;
-    }
-  // Read PDF stream as blob and embed in iframe
-  const blob = await resp.blob();
-    const url = URL.createObjectURL(blob);
 
-    if (frame) {
-      frame.src = url;
-      frame.classList.remove('hidden');
+      showToast("❌ PDF preview failed. Try downloading instead.", "error");
     }
-    if (placeholder) {
-      placeholder.classList.add('hidden');
-    }
-    if (status) status.textContent = "Preview ready";
-  } catch (e) {
-    console.error('PDF preview error:', e);
-    if (frame) frame.classList.add('hidden');
-    if (placeholder) {
-      placeholder.classList.remove('hidden');
-      placeholder.textContent = 'Inline compile failed. Click Download PDF or try again.';
-    }
-  if (status) status.textContent = "Preview unavailable; try Download PDF.";
   } finally {
     btn.disabled = false;
     btn.innerHTML = originalHtml;
   }
 }
 
-try { window.previewResumePdfInline = previewResumePdfInline; } catch(_){}
+try {
+  window.previewResumePdfInline = previewResumePdfInline;
+} catch (_) {}
 
 // Copy LaTeX Code to Clipboard
 async function copyLatexCode() {
@@ -2624,10 +2709,10 @@ async function copyLatexCode() {
     alert("Please generate a resume first.");
     return;
   }
-  
+
   try {
     await navigator.clipboard.writeText(generatedLatexCode);
-    
+
     // Show success feedback
     const copyBtn = document.getElementById("copyLatexBtn");
     const originalText = copyBtn.innerHTML;
@@ -2637,18 +2722,19 @@ async function copyLatexCode() {
       </svg>
       Copied!
     `;
-    
+
     setTimeout(() => {
       copyBtn.innerHTML = originalText;
     }, 2000);
-    
   } catch (error) {
     console.error("Failed to copy:", error);
     alert("Failed to copy to clipboard. Please select and copy manually.");
   }
 }
 
-try { window.copyLatexCode = copyLatexCode; } catch(_){}
+try {
+  window.copyLatexCode = copyLatexCode;
+} catch (_) {}
 
 // Download PDF using server endpoint
 async function downloadLatexPdf() {
@@ -2667,53 +2753,159 @@ async function downloadLatexPdf() {
     Preparing…
   `;
   try {
-    // Prefer accurate TeX compile for download
+    console.log("🔄 Downloading high-quality PDF...");
+
+    // Try the new high-quality PDF generator first
     let ok = false;
     try {
-      const texDl = await fetch('/api/download-latex-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ latexCode: generatedLatexCode, filename: 'resume' })
+      btn.innerHTML = `
+        <svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Generating High-Quality PDF…
+      `;
+
+      const resp = await fetch("/api/pdf-from-latex", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          latexCode: generatedLatexCode,
+          filename: "resume-download",
+        }),
       });
-      if (texDl.ok) {
-        const blob = await texDl.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'resume.pdf';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-        ok = true;
+
+      if (resp.ok) {
+        const result = await resp.json();
+
+        if (result.success && result.data.pdfBase64) {
+          // Convert base64 to blob and download
+          const base64Data = result.data.pdfBase64;
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: "application/pdf" });
+
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "resume-high-quality.pdf";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+
+          const method = result.data.method || "latex.js + PDFKit";
+          const warningMsg = result.data.warning
+            ? ` (${result.data.warning})`
+            : "";
+          showToast(
+            `✅ High-quality PDF downloaded${warningMsg} - ${method}`,
+            "success"
+          );
+
+          console.log("✅ High-quality PDF downloaded successfully");
+          console.log(`📄 Size: ${(result.data.size / 1024).toFixed(1)} KB`);
+          ok = true;
+        }
       }
-    } catch(_) {}
+    } catch (highQualityError) {
+      console.warn(
+        "High-quality PDF download failed, trying fallbacks...",
+        highQualityError
+      );
+    }
 
     if (!ok) {
-      // Fallback to fast renderer
-      const resp = await fetch('/api/generate-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ latexCode: generatedLatexCode, filename: 'resume' })
+      // Fallback 1: Try TeXlive service
+      console.log("🔄 Trying TeXlive PDF download...");
+      try {
+        btn.innerHTML = `
+          <svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 718-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Trying TeXlive…
+        `;
+
+        const texDl = await fetch("/api/download-latex-pdf", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            latexCode: generatedLatexCode,
+            filename: "resume",
+          }),
+        });
+
+        if (texDl.ok) {
+          const blob = await texDl.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "resume-texlive.pdf";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+
+          showToast("✅ PDF downloaded (TeXlive service)", "success");
+          console.log("✅ TeXlive PDF downloaded successfully");
+          ok = true;
+        }
+      } catch (_) {}
+    }
+
+    if (!ok) {
+      // Fallback 2: Use original local PDF generator
+      console.log("🔄 Using fallback PDF download method...");
+      btn.innerHTML = `
+        <svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 718-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Using Fallback…
+      `;
+
+      const resp = await fetch("/api/generate-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          latexCode: generatedLatexCode,
+          filename: "resume",
+        }),
       });
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const blob = await resp.blob();
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = 'resume.pdf';
+      a.download = "resume-fallback.pdf";
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+
+      showToast("⚠️ PDF downloaded using fallback method", "warning");
+      console.log("✅ Fallback PDF downloaded successfully");
     }
   } catch (e) {
-    console.error('Download failed', e);
-    alert('Failed to download PDF. Try Preview first or retry.');
+    console.error("All PDF download methods failed:", e);
+    showToast(
+      "❌ PDF download failed. Try copying LaTeX code and using Overleaf.",
+      "error"
+    );
+    alert(
+      "Failed to download PDF. Please try copying the LaTeX code and using Overleaf.com instead."
+    );
   } finally {
     btn.disabled = false;
     btn.innerHTML = original;
   }
 }
 
-try { window.downloadLatexPdf = downloadLatexPdf; } catch(_){ }
+try {
+  window.downloadLatexPdf = downloadLatexPdf;
+} catch (_) {}
